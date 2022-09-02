@@ -32,7 +32,10 @@ class Node:
 
 # the traffic graph 
 class TrafficGraph:
-    nodes: list = list()
+    nodes: list
+
+    def __init__(self) -> None:
+        self.nodes = list()
 
     def get_node_from_scats_number(self, scats_number: int) -> Node:
         n = [x for x in self.nodes if x.scats_number == scats_number]
@@ -44,7 +47,10 @@ class TrafficGraph:
 
 # the route
 class Route:
-    nodes: list = list()
+    nodes: list
+
+    def __init__(self) -> None:
+        self.nodes = list()
 
     def print_route(self):
         for node in self.nodes:
@@ -63,9 +69,11 @@ class RouteNode:
         route = Route()
         cur_node: Self = self
         while cur_node != NULL:
+            print (cur_node.node.scats_number)
             route.nodes.append(cur_node.node)
             cur_node = cur_node.previous_node
-        #route.nodes.reverse()
+        route.nodes.reverse()
+        print(len(route.nodes))
         return route
     
     def expand_node(self, traffic_network: TrafficGraph) -> list:
@@ -136,7 +144,7 @@ def find_routes(traffic_network: TrafficGraph, origin: int, destination: int, ro
         # remove the selected node from the frontier
         frontier.remove(selected)
 
-        # TODO see if it needs to check for duplicate nodes
+        # TODO see if it needs to check for duplicate nodes before expanding
         frontier.extend(children)
     
     return routes
@@ -145,7 +153,7 @@ def find_routes(traffic_network: TrafficGraph, origin: int, destination: int, ro
 
 if __name__ == "__main__":
     traffic_network = open_road_network("traffic_network.csv")
-    routes = find_routes(traffic_network, 970, 2825, route_options_count=2)
+    routes = find_routes(traffic_network, 970, 2825, route_options_count=3)
     for r in routes:
         print ("--ROUTE--")
         r.print_route()
