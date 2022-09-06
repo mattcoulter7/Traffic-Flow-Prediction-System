@@ -2,10 +2,12 @@ from asyncio.windows_events import NULL
 from distutils.log import debug
 import string
 import csv
+import geopy.distance
 from enum import Enum
 from operator import attrgetter
 from typing import List
 from typing_extensions import Self
+
 
 # enum for each type of scats site
 class SiteType(Enum):
@@ -60,10 +62,13 @@ class Route:
 class RouteNode:
     node: Node
     previous_node: Self
+    cost: float
 
     def __init__(self, node: Self, previous_node: Self) -> None:
         self.node = node
         self.previous_node = previous_node
+        self.cost = self.calcuate_node_cost()
+        #print(self.node.name, self.cost)
 
     def convert_to_route(self) -> Route:
         route = Route()
@@ -74,6 +79,7 @@ class RouteNode:
             cur_node = cur_node.previous_node
         route.nodes.reverse()
         print(len(route.nodes))
+        print(self.cost, "km")
         return route
     
     def expand_node(self, traffic_network: TrafficGraph) -> list:
@@ -87,10 +93,17 @@ class RouteNode:
             return 0.0
         
         # caclucate the cost to travel to the previous node
-        cost = 1 # TODO calculate the actual cost of the paths it prediced time
-        
+        #cost = 1 # TODO calculate the actual cost of the paths it prediced time
+
+        coords_1 = (self.node.latitude, self.node.longitude)
+        coords_2 = (self.previous_node.node.latitude, self.previous_node.node.longitude)
+
+        cost = geopy.distance.geodesic(coords_1, coords_2).km
+
+        if cost == 0:
+            print ("ERROR in data:", self.node.scats_number, ",", self.node.name)
         # add the cost to the current cost of the path
-        cost += self.previous_node.calcuate_node_cost()
+        cost += self.previous_node.cost
 
         return cost
 
@@ -125,24 +138,47 @@ def find_routes(traffic_network: TrafficGraph, origin: int, destination: int, ro
     frontier.append(RouteNode(traffic_network.get_node_from_scats_number(origin), NULL))
     while len(frontier) > 0:
         # sort the frontier by the path cost
-        frontier.sort(key=lambda x: x.calcuate_node_cost())
+        frontier.sort(key=lambda x: x.cost)
 
         # selected is the fist node in the list as it has the lowest cost
-        selected: RouteNode = frontier[len(routes)]
+        selected: RouteNode = frontier[0]
 
         # is the frontier at the destination?
         if selected.node == destination_node:
             print ("route found")
             routes.append(selected.convert_to_route())
+            
+            # remove destination node from list
+            frontier.remove(selected)
+            
             # exit search when the desired number of routes are found 
             if len(routes) == route_options_count:
                 break
+
+            continue
         
         # expand the selected node
         children: list = selected.expand_node(traffic_network)
         
         # remove the selected node from the frontier
         frontier.remove(selected)
+
+        # remove nodes with loops in it
+        for c in children:
+            new_node: Node = c.node
+            previous_node: RouteNode = c.previous_node
+            duplicated = False
+            while previous_node != NULL:
+                if new_node == previous_node.node:
+                    # duplicated node
+                    #print("duplicated")
+                    duplicated = True
+                    break
+                # set the previous node to the previous previous node
+                previous_node = previous_node.previous_node
+            
+            if duplicated:
+                children.remove(c)
 
         # TODO see if it needs to check for duplicate nodes before expanding
         frontier.extend(children)
@@ -153,7 +189,7 @@ def find_routes(traffic_network: TrafficGraph, origin: int, destination: int, ro
 
 if __name__ == "__main__":
     traffic_network = open_road_network("traffic_network.csv")
-    routes = find_routes(traffic_network, 970, 2825, route_options_count=3)
+    routes = find_routes(traffic_network, 4272, 4266, route_options_count=5)
     for r in routes:
         print ("--ROUTE--")
         r.print_route()
