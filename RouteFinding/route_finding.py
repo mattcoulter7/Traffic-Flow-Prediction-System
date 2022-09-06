@@ -110,7 +110,7 @@ def open_road_network(file: string) -> TrafficGraph:
             node.latitude = float(row['Latitude'])
             node.longitude = float(row['Longitude'])
             node.scats_type = SiteType[row['Site Type']]
-            node.neighbours = [int(x) for x in row['Neighbours'].split('|')]
+            node.neighbours = [int(x) for x in row['Neighbours'].split(';')]
             tg.nodes.append(node)
             print(node.scats_number, node.name, node.latitude, node.longitude, node.scats_type, node.neighbours)
 
