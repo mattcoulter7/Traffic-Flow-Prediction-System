@@ -56,9 +56,20 @@ class Route:
 
     def print_route(self):
         for node in self.nodes:
-            print(node.name)
+            print(node.scats_number ,"-" ,node.name)
+        print ("Length:", len(self.nodes))
+        print ("Distance:", str(self.calculate_route_distance()) + "km")
 
-# route Node
+    def calculate_route_distance(self) -> float:
+        dist = 0.0
+        for i in range(len(self.nodes) - 1):
+            coords_1 = (self.nodes[i].latitude, self.nodes[i].longitude)
+            coords_2 = (self.nodes[i + 1].latitude, self.nodes[i + 1].longitude)
+
+            dist += geopy.distance.geodesic(coords_1, coords_2).km
+        return dist
+
+# route Node wraps up the node class and implements functionality to allow for routing for A* graph search
 class RouteNode:
     node: Node
     previous_node: Self
@@ -74,12 +85,12 @@ class RouteNode:
         route = Route()
         cur_node: Self = self
         while cur_node != NULL:
-            print (cur_node.node.scats_number)
+            #print (cur_node.node.scats_number)
             route.nodes.append(cur_node.node)
             cur_node = cur_node.previous_node
         route.nodes.reverse()
-        print(len(route.nodes))
-        print(self.cost, "km")
+        #print(len(route.nodes))
+        #print(self.cost, "km")
         return route
     
     def expand_node(self, traffic_network: TrafficGraph) -> list:
@@ -125,7 +136,7 @@ def open_road_network(file: string) -> TrafficGraph:
             node.scats_type = SiteType[row['Site Type']]
             node.neighbours = [int(x) for x in row['Neighbours'].split(';')]
             tg.nodes.append(node)
-            print(node.scats_number, node.name, node.latitude, node.longitude, node.scats_type, node.neighbours)
+            #print(node.scats_number, node.name, node.latitude, node.longitude, node.scats_type, node.neighbours)
 
     return tg
 
@@ -145,7 +156,7 @@ def find_routes(traffic_network: TrafficGraph, origin: int, destination: int, ro
 
         # is the frontier at the destination?
         if selected.node == destination_node:
-            print ("route found")
+            #print ("route found")
             routes.append(selected.convert_to_route())
             
             # remove destination node from list
@@ -189,7 +200,7 @@ def find_routes(traffic_network: TrafficGraph, origin: int, destination: int, ro
 
 if __name__ == "__main__":
     traffic_network = open_road_network("traffic_network.csv")
-    routes = find_routes(traffic_network, 4272, 4266, route_options_count=5)
-    for r in routes:
-        print ("--ROUTE--")
+    routes = find_routes(traffic_network, 2000, 4821, route_options_count=5)
+    for i, r in enumerate(routes):
+        print (f"--ROUTE {i + 1}--")
         r.print_route()
