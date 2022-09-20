@@ -8,6 +8,8 @@ from operator import attrgetter
 from typing import List
 from typing_extensions import Self
 
+SPEED = 60 / 3.6 # approximate the speed to be a constant 60km/hr or 16.6667m/s
+ITERSECTION_WAIT_TIME = 30 # approximate an average wait time of 30 seconds for each intersection
 
 # enum for each type of scats site
 class SiteType(Enum):
@@ -50,15 +52,18 @@ class TrafficGraph:
 # the route
 class Route:
     nodes: list
+    cost: float
 
-    def __init__(self) -> None:
+    def __init__(self, cost) -> None:
         self.nodes = list()
+        self.cost = cost
 
     def print_route(self):
         for node in self.nodes:
             print(node.scats_number ,"-" ,node.name)
         print ("Length:", len(self.nodes))
-        print ("Distance:", str(self.calculate_route_distance()) + "km")
+        print ("Distance:", "{:.2f}".format(self.calculate_route_distance()) + "km")
+        print ("Cost: ", "{:.2f}".format(self.cost) + "s")
 
     def calculate_route_distance(self) -> float:
         dist = 0.0
@@ -82,7 +87,7 @@ class RouteNode:
         #print(self.node.name, self.cost)
 
     def convert_to_route(self) -> Route:
-        route = Route()
+        route = Route(self.cost)
         cur_node: Self = self
         while cur_node != NULL:
             #print (cur_node.node.scats_number)
@@ -104,19 +109,24 @@ class RouteNode:
             return 0.0
         
         # caclucate the cost to travel to the previous node
-        #cost = 1 # TODO calculate the actual cost of the paths it prediced time
-
         coords_1 = (self.node.latitude, self.node.longitude)
         coords_2 = (self.previous_node.node.latitude, self.previous_node.node.longitude)
 
-        cost = geopy.distance.geodesic(coords_1, coords_2).km
+        dist = geopy.distance.geodesic(coords_1, coords_2).meters
 
-        if cost == 0:
-            print ("ERROR in data:", self.node.scats_number, ",", self.node.name)
+        # check the locations are correct
+        if dist == 0:
+            raise RuntimeError("ERROR in data:", self.node.scats_number, ",", self.node.name)
+            
+        # calculate segment time in seconds
+        segment_time = dist / SPEED
+
         # add the cost to the current cost of the path
-        cost += self.previous_node.cost
+        cost = self.previous_node.cost + segment_time + ITERSECTION_WAIT_TIME if self.node.scats_type == SiteType.INT else 0
 
         return cost
+
+
 
 # open the route file 
 def open_road_network(file: string) -> TrafficGraph:
@@ -200,7 +210,7 @@ def find_routes(traffic_network: TrafficGraph, origin: int, destination: int, ro
 
 if __name__ == "__main__":
     traffic_network = open_road_network("traffic_network.csv")
-    routes = find_routes(traffic_network, 2000, 4821, route_options_count=5)
+    routes = find_routes(traffic_network, 3180, 4812, route_options_count=5)
     for i, r in enumerate(routes):
         print (f"--ROUTE {i + 1}--")
         r.print_route()
