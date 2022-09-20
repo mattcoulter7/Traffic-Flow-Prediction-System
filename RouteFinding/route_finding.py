@@ -3,7 +3,7 @@ from distutils.log import debug
 import string
 import csv
 import geopy.distance
-from TrafficData import get_traffic_volume
+from TrafficData.TrafficData import get_traffic_volume
 from enum import Enum
 from operator import attrgetter
 from typing import List

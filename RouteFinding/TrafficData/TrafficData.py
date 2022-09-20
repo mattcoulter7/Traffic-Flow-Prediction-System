@@ -5,5 +5,5 @@ from random import Random
 
 def get_traffic_volume(scats_number: int, time: float) -> float:
     random = Random()
-    random.seed(scats_number)
+    random.seed(scats_number + time)
     return random.uniform(1, 100)
