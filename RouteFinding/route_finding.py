@@ -3,6 +3,7 @@ from distutils.log import debug
 import string
 import csv
 import geopy.distance
+from TrafficData import get_traffic_volume
 from enum import Enum
 from operator import attrgetter
 from typing import List
@@ -61,9 +62,10 @@ class Route:
     def print_route(self):
         for node in self.nodes:
             print(node.scats_number ,"-" ,node.name)
-        print ("Length:", len(self.nodes))
-        print ("Distance:", "{:.2f}".format(self.calculate_route_distance()) + "km")
-        print ("Cost: ", "{:.2f}".format(self.cost) + "s")
+        print ("Length:\t\t", len(self.nodes))
+        print ("Distance:\t", "{:.2f}".format(self.calculate_route_distance()) + "km")
+        # convert cost from seconds to minutes
+        print ("Cost:\t\t", "{:.2f}".format(self.cost / 60) + "mins")
 
     def calculate_route_distance(self) -> float:
         dist = 0.0
@@ -209,8 +211,12 @@ def find_routes(traffic_network: TrafficGraph, origin: int, destination: int, ro
 # display the routes 
 
 if __name__ == "__main__":
+    print(get_traffic_volume(100, 100))
+    print(get_traffic_volume(150, 100))
+    print(get_traffic_volume(200, 100))
+    print(get_traffic_volume(100, 100))
     traffic_network = open_road_network("traffic_network.csv")
-    routes = find_routes(traffic_network, 3180, 4812, route_options_count=5)
+    routes = find_routes(traffic_network, 4264, 4266, route_options_count=5)
     for i, r in enumerate(routes):
         print (f"--ROUTE {i + 1}--")
         r.print_route()
