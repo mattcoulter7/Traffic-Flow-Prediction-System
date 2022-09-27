@@ -46,7 +46,7 @@ def normalise_data(file):
             if index < 1:
                 continue
             scats = scats_encoder(row[0])
-            date = get_date(row[1]).weekday()
+            date = get_date(row[1]).weekday() / 6
             time = normalise_time(row[2])
             flow = (float(row[3]) - flow_min) / (flow_max - flow_min)
             condition = float(row[4])
@@ -59,25 +59,36 @@ def normalise_data(file):
 x_train, y_train = normalise_data("Data/TrainData.csv")
 x_test, y_test = normalise_data("Data/TestData.csv")
 
+print(x_train)
 
 model = keras.Sequential()
-model.add(layers.LSTM(4, input_shape=(4,), activation='relu', return_sequences=True))
-model.add(layers.LSTM(16, input_shape=(16,), activation='relu', return_sequences=True))
-model.add(layers.LSTM(16, input_shape=(16,), activation='relu'))
-model.add(layers.Dense(units=1, activation='relu'))
+model.add(layers.LSTM(4, input_shape=(4, 1), return_sequences=True))
+model.add(layers.LSTM(8))
+model.add(layers.Dropout(0.2))
+model.add(layers.Dense(1, activation='sigmoid'))
+#input layer
+#model.add(layers.LSTM(4, input_shape=(4,), activation='relu', return_sequences=True))
+#hidden layers
+
+#output layer
+
+
+# model.add(layers.LSTM(4, input_shape=(4,), activation='relu', return_sequences=True))
+# model.add(layers.LSTM(16, input_shape=(16,), activation='relu', return_sequences=True))
+# model.add(layers.LSTM(16, input_shape=(16,), activation='relu'))
+# model.add(layers.Dense(units=1, activation='relu'))
 
 # model.add(keras.Input(shape=(4, 1)))
 
 
 model.compile(
     loss=keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-    optimizer=keras.optimizers.Adam(learning_rate=0.01),
+    optimizer=keras.optimizers.Adam(learning_rate=0.1),
     metrics=["accuracy"]
 )
 
-model.fit(x_train,y_train, batch_size=256, epochs=1, verbose=2)
-model.evaluate(x_test,y_test, batch_size=256, verbose=2)
+model.fit(x_train,y_train, batch_size=128, epochs=50, verbose=2)
+model.evaluate(x_test,y_test, batch_size=128, verbose=2)
 
-print(x_train[1], y_train[1])
 
-print("Prediction:", model.predict(x_train[1]))
+# print("Prediction:", model.predict(x_train[1]))
