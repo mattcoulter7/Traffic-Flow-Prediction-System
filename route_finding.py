@@ -13,6 +13,7 @@ from typing_extensions import Self
 
 SPEED = 60 / 3.6 # approximate the speed to be a constant 60km/hr or 16.6667m/s NOTE this is the max speed 
 ITERSECTION_WAIT_TIME = 30 # approximate an average wait time of 30 seconds for each intersection
+TRAFFIC_NETWORK_FILE = "data/traffic_network.csv"
 
 # enum for each type of scats site
 class SiteType(Enum):
@@ -232,7 +233,7 @@ def find_routes(traffic_network: TrafficGraph, origin: int, destination: int, ro
 # display the routes 
 
 if __name__ == "__main__":
-    traffic_network = open_road_network("traffic_network.csv")
+    traffic_network = open_road_network(TRAFFIC_NETWORK_FILE)
     routes = find_routes(traffic_network, 4264, 4266, route_options_count=5)
     for i, r in enumerate(routes):
         print (f"--ROUTE {i + 1}--")
