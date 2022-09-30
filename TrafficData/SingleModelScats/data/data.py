@@ -54,7 +54,7 @@ def process_data(train, test, lags,scats_id = '0970'):
 
     X = data[:, :-1]
     y = data[:,-1]
-
+    
     X_train = train[:, :-1]
     y_train = train[:, -1]
 

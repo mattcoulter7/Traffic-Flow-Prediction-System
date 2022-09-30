@@ -127,6 +127,7 @@ def main():
         predicted = flow_scaler.inverse_transform(predicted.reshape(-1, 1)).reshape(1, -1)[0]
         y_preds.append(predicted[:96])
         print(name)
+        #print("predicted:", predicted, "\nx_loc:", X_location, "\ny_preds", y_preds)
         eva_regress(y_location, predicted)
 
     plot_results(y_location[: 96], y_preds, names)

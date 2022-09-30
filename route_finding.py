@@ -5,7 +5,7 @@ import csv
 from sys import float_repr_style
 from turtle import distance
 import geopy.distance
-from TrafficData.TrafficData import get_traffic_flow
+from TrafficData.TrafficData import get_traffic_flow, open_traffic_model
 from enum import Enum
 from operator import attrgetter
 from typing import List
@@ -233,6 +233,7 @@ def find_routes(traffic_network: TrafficGraph, origin: int, destination: int, ro
 # display the routes 
 
 if __name__ == "__main__":
+    open_traffic_model('gru.h5')
     traffic_network = open_road_network(TRAFFIC_NETWORK_FILE)
     routes = find_routes(traffic_network, 4264, 4266, route_options_count=5)
     for i, r in enumerate(routes):
