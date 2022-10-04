@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 import datetime
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
-from functools import lru_cache
 
 # Date Format: 3/10/2006 2:45
 def parse_date(date_string):
@@ -14,7 +13,6 @@ def parse_date(date_string):
     hour,minute = time.split(':')
     return datetime.datetime(int(year),int(month),int(day),int(hour),int(minute))
 
-@lru_cache(maxsize=None)
 def process_data(train, test,scats_id = 970,day=0):
     """Process data
     Reshape and split train\test data.

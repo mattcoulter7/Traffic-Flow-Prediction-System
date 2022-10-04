@@ -1,7 +1,6 @@
 """
 Traffic Flow Prediction with Neural Networks(SAEs、LSTM、GRU).
 """
-from functools import cache
 import math
 import warnings
 import argparse
@@ -9,6 +8,8 @@ import numpy as np
 import pandas as pd
 import string
 import os
+
+from sklearn.preprocessing import MinMaxScaler
 from .data.data import process_data
 from keras.models import load_model
 from keras.utils.vis_utils import plot_model
@@ -17,7 +18,6 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 warnings.filterwarnings("ignore")
 import tensorflow as tf
-from functools import lru_cache
 
 def MAPE(y_true, y_pred):
     """Mean Absolute Percentage Error
@@ -96,31 +96,6 @@ def plot_results(y_true, y_preds, names):
     fig.autofmt_xdate()
 
     plt.show()
-
-cached_models = {}
-def get_model(model_name:string):
-    if cached_models.get(model_name) == None:
-        cached_models[model_name] = load_model(os.path.join(os.path.dirname(__file__),'model',f'{model_name}.h5'))
-    return cached_models.get(model_name)
-
-@lru_cache(maxsize=None)
-def predict_traffic_flow(location: int,dayindex: int,model_name: string = "lstm"):
-    model = get_model(model_name)
-    file1 = os.path.join(os.path.dirname(__file__),'data','train-data.csv')
-    file2 = os.path.join(os.path.dirname(__file__),'data','test-data.csv')
-
-    _, _, _, _,_,_,X,y_location,flow_scaler, scats_scalar,days_scalar,times_scalar = process_data(file1, file2,scats_id=location,day=dayindex)
-    y_location = flow_scaler.inverse_transform(y_location.reshape(-1, 1)).reshape(1, -1)[0]
-
-    days = days_scalar.transform(np.array([dayindex for _ in range(96)]).reshape(-1,1)).reshape(1,-1)[0]
-    times = times_scalar.transform(np.array([t*15 for t in range(96)]).reshape(-1,1)).reshape(1,-1)[0]
-    scats = scats_scalar.transform(np.array([location for _ in range(96)]).reshape(-1,1)).reshape(1,-1)[0]
-    X = np.array([np.array([days[i],times[i],scats[i]]) for i in range(96)])
-
-    X = np.reshape(X, (X.shape[0], X.shape[1], 1))
-    predicted = model.predict(X)
-    predicted = flow_scaler.inverse_transform(predicted.reshape(-1, 1)).reshape(1, -1)[0]
-    return predicted[:96]
 
 def main():
     parser = argparse.ArgumentParser()
