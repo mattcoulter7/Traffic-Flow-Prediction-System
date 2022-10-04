@@ -2,10 +2,11 @@ from asyncio.windows_events import NULL
 from distutils.log import debug
 import string
 import csv
+import datetime
 from sys import float_repr_style
 from turtle import distance
 import geopy.distance
-from TrafficData.TrafficData import get_traffic_flow, open_traffic_model
+from TrafficData.TrafficData import predict_traffic_flow
 from enum import Enum
 from operator import attrgetter
 from typing import List
@@ -127,12 +128,11 @@ class RouteNode:
         # calculate the speed of the segment
         # speed = flow / density
         # flow the number of vehicles passing over a point over a period of time
-        time = 10
-        flow = get_traffic_flow(self.previous_node.node.scats_number, time)
+        time = datetime.datetime.now()
+        flow = predict_traffic_flow(self.previous_node.node.scats_number,time)
         
         # density the number of vehicles per unit lenght
         density = dist * flow
-
 
         traffic_speed = SPEED * 10 / flow 
         #print ("flow:", traffic_speed)
@@ -142,8 +142,6 @@ class RouteNode:
 
         # calculate segment time in seconds
         segment_time = dist / speed
-
-
 
         # add the cost to the current cost of the path
         cost = self.previous_node.cost + segment_time + ITERSECTION_WAIT_TIME if self.node.scats_type == SiteType.INT else 0
@@ -233,7 +231,6 @@ def find_routes(traffic_network: TrafficGraph, origin: int, destination: int, ro
 # display the routes 
 
 if __name__ == "__main__":
-    open_traffic_model('gru.h5')
     traffic_network = open_road_network(TRAFFIC_NETWORK_FILE)
     routes = find_routes(traffic_network, 4264, 4266, route_options_count=5)
     for i, r in enumerate(routes):
