@@ -1,10 +1,13 @@
 from random import Random
 import string
+import datetime
 from keras.models import load_model
 from sklearn.datasets import make_blobs
 from sklearn.preprocessing import MinMaxScaler
 from keras.models import Sequential
 from TrafficData.SingleModelScats.data.data import process_data
+from TrafficData.TimeModel.main import predict_traffic_flow
+from functools import lru_cache
 
 #TODO this is just a dummy filler function for now need to create proper implementation for final
 # get traffic data
@@ -51,4 +54,11 @@ def get_traffic_flow(scats_number: int, time: float) -> float:
     random.seed(scats_number + time)
     return y_new #random.uniform(1, 100)
 
-    
+def predict_flow(location: string,date: datetime):
+    weekday = date.weekday()
+    time = date.hour * 60 + date.minute
+    y_pred = predict_traffic_flow(location,weekday)
+
+    time_index = round(time/15)
+
+    return y_pred[time_index]

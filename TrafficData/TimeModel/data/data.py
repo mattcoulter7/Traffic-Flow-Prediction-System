@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import datetime
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
-
+from functools import lru_cache
 
 # Date Format: 3/10/2006 2:45
 def parse_date(date_string):
@@ -14,7 +14,8 @@ def parse_date(date_string):
     hour,minute = time.split(':')
     return datetime.datetime(int(year),int(month),int(day),int(hour),int(minute))
 
-def process_data(train, test,scats_id = '0970',day='0'):
+@lru_cache(maxsize=None)
+def process_data(train, test,scats_id = 970,day=0):
     """Process data
     Reshape and split train\test data.
 
@@ -79,10 +80,7 @@ def process_data(train, test,scats_id = '0970',day='0'):
     X = data[:, :-1]
     y = data[:, -1]
 
-
-    day = int(day)
     day = day_scalar.transform(np.array([day]).reshape(-1,1)).reshape(1,-1)[0][0]
-    scats_id = int(scats_id)
     scats_id = scats_scalar.transform(np.array([scats_id]).reshape(-1,1)).reshape(1,-1)[0][0]
     location_indices = [i for i in range(len(X)) if X[i][2] == scats_id and X[i][0] == day]
     X_location = X[location_indices]
