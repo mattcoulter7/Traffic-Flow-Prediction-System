@@ -1,4 +1,5 @@
 from asyncio.windows_events import NULL
+from cmath import sqrt
 from distutils.log import debug
 import string
 import csv
@@ -12,8 +13,12 @@ from operator import attrgetter
 from typing import List
 from typing_extensions import Self
 
-SPEED = 60 / 3.6 # approximate the speed to be a constant 60km/hr or 16.6667m/s NOTE this is the max speed 
-ITERSECTION_WAIT_TIME = 30 # approximate an average wait time of 30 seconds for each intersection
+MAX_SPEED = 60 # estimate to be the speed limit for all roads
+CAPACITY_SPEED = 48
+FREE_FLOW_SPEED = 48 * 2
+MAX_FLOW_RATE = 1800
+JAM_DENSITY = 150
+ITERSECTION_WAIT_TIME = 30 / 60 / 60 # approximate an average wait time of 30 seconds for each intersection this is converted to hours
 TRAFFIC_NETWORK_FILE = "data/traffic_network.csv"
 
 # enum for each type of scats site
@@ -69,7 +74,7 @@ class Route:
         print ("Length:\t\t", len(self.nodes))
         print ("Distance:\t", "{:.2f}".format(self.calculate_route_distance()) + "km")
         # convert cost from seconds to minutes
-        print ("Cost:\t\t", "{:.2f}".format(self.cost / 60) + "mins")
+        print ("Cost:\t\t", "{:.2f}".format(self.cost * 60) + "mins")
 
     def calculate_route_distance(self) -> float:
         dist = 0.0
@@ -118,7 +123,7 @@ class RouteNode:
         coords_1 = (self.node.latitude, self.node.longitude)
         coords_2 = (self.previous_node.node.latitude, self.previous_node.node.longitude)
 
-        dist = geopy.distance.geodesic(coords_1, coords_2).meters
+        dist = geopy.distance.geodesic(coords_1, coords_2).km
 
         # check the locations are correct
         if dist == 0:
@@ -128,18 +133,25 @@ class RouteNode:
         # calculate the speed of the segment
         # speed = flow / density
         # flow the number of vehicles passing over a point over a period of time
+
         time = datetime.datetime.now()
         flow = predict_traffic_flow(self.previous_node.node.scats_number,time)
         
         # density the number of vehicles per unit lenght
-        density = dist * flow
+        #density = dist * flow
 
-        traffic_speed = SPEED * 10 / flow 
+        #traffic_speed = SPEED * 10 / flow 
         #print ("flow:", traffic_speed)
 
         # select the min speed as traffic cant breach the speed limit
-        speed = min(SPEED, traffic_speed)
 
+        traffic_speed = 48 - (8 * sqrt(1800 - flow) / 5 * sqrt(2))
+        traffic_speed2 = 48 + ((8 * sqrt(1800 - flow) )/( 5 * sqrt(2)))
+        #print("speed1: ", traffic_speed)
+        #print("speed2: ", traffic_speed2)
+
+        speed = min(MAX_SPEED, traffic_speed2.real)
+        
         # calculate segment time in seconds
         segment_time = dist / speed
 
@@ -232,7 +244,7 @@ def find_routes(traffic_network: TrafficGraph, origin: int, destination: int, ro
 
 if __name__ == "__main__":
     traffic_network = open_road_network(TRAFFIC_NETWORK_FILE)
-    routes = find_routes(traffic_network, 4264, 4266, route_options_count=5)
+    routes = find_routes(traffic_network, 970, 4321, route_options_count=5)
     for i, r in enumerate(routes):
         print (f"--ROUTE {i + 1}--")
         r.print_route()
