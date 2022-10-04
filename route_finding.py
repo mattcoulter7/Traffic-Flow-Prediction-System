@@ -133,12 +133,14 @@ class RouteNode:
             
         # calculate the speed of the segment
         # flow the number of vehicles passing over a point over a period of time
-        flow = predict_traffic_flow(self.previous_node.node.scats_number, date)
+        # add the cost to the predition so the traffic times are slightly more accurate
+        new_date_time = date + datetime.timedelta(hours=self.previous_node.cost)
+        flow = predict_traffic_flow(self.previous_node.node.scats_number, new_date_time)
         #random.seed(self.previous_node.node.scats_number + time.minute)
         #flow = random.randint(0, 1800)
 
         # clamp the flow value 1800
-        flow = numpy.clip(flow,0, 1800)
+        flow = numpy.clip(flow, 0, 1800)
 
         traffic_speed = 48 - ((8 * sqrt(1800 - flow)) / (5 * sqrt(2)))
         traffic_speed2 = 48 + ((8 * sqrt(1800 - flow)) / ( 5 * sqrt(2)))
