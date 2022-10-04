@@ -4,6 +4,8 @@ from distutils.log import debug
 import string
 import csv
 import datetime
+import numpy
+import random
 from sys import float_repr_style
 from turtle import distance
 import geopy.distance
@@ -91,10 +93,10 @@ class RouteNode:
     previous_node: Self
     cost: float
 
-    def __init__(self, node: Self, previous_node: Self) -> None:
+    def __init__(self, node: Self, previous_node: Self, date: datetime) -> None:
         self.node = node
         self.previous_node = previous_node
-        self.cost = self.calcuate_node_cost()
+        self.cost = self.calcuate_node_cost(date)
         #print(self.node.name, self.cost)
 
     def convert_to_route(self) -> Route:
@@ -112,10 +114,10 @@ class RouteNode:
     def expand_node(self, traffic_network: TrafficGraph) -> list:
         nodes = list()
         for n in self.node.neighbours:
-            nodes.append(RouteNode(traffic_network.get_node_from_scats_number(n), self))
+            nodes.append(RouteNode(traffic_network.get_node_from_scats_number(n), self, self.date))
         return nodes
 
-    def calcuate_node_cost(self) -> float:
+    def calcuate_node_cost(self, date: datetime) -> float:
         if self.previous_node == NULL:
             return 0.0
         
@@ -129,27 +131,20 @@ class RouteNode:
         if dist == 0:
             raise RuntimeError("ERROR in data:", self.node.scats_number, ",", self.node.name)
             
-
         # calculate the speed of the segment
-        # speed = flow / density
         # flow the number of vehicles passing over a point over a period of time
+        flow = predict_traffic_flow(self.previous_node.node.scats_number, date)
+        #random.seed(self.previous_node.node.scats_number + time.minute)
+        #flow = random.randint(0, 1800)
 
-        time = datetime.datetime.now()
-        flow = predict_traffic_flow(self.previous_node.node.scats_number,time)
-        
-        # density the number of vehicles per unit lenght
-        #density = dist * flow
+        # clamp the flow value 1800
+        flow = numpy.clip(flow,0, 1800)
 
-        #traffic_speed = SPEED * 10 / flow 
-        #print ("flow:", traffic_speed)
+        traffic_speed = 48 - ((8 * sqrt(1800 - flow)) / (5 * sqrt(2)))
+        traffic_speed2 = 48 + ((8 * sqrt(1800 - flow)) / ( 5 * sqrt(2)))
+        print("flow:", flow, "speed 1:", traffic_speed, "speed 2:", traffic_speed2)
 
-        # select the min speed as traffic cant breach the speed limit
-
-        traffic_speed = 48 - (8 * sqrt(1800 - flow) / 5 * sqrt(2))
-        traffic_speed2 = 48 + ((8 * sqrt(1800 - flow) )/( 5 * sqrt(2)))
-        #print("speed1: ", traffic_speed)
-        #print("speed2: ", traffic_speed2)
-
+        # select the min speed as traffic can't breach the speed limit
         speed = min(MAX_SPEED, traffic_speed2.real)
         
         # calculate segment time in seconds
@@ -185,12 +180,12 @@ def open_road_network(file: string) -> TrafficGraph:
     return tg
 
 # a-star algorithm 
-def find_routes(traffic_network: TrafficGraph, origin: int, destination: int, route_options_count: int = 5) -> list:
+def find_routes(traffic_network: TrafficGraph, origin: int, destination: int, date: datetime, route_options_count: int = 5) -> list:
     routes = list()
     destination_node = traffic_network.get_node_from_scats_number(destination)
     frontier = list()
     # add origin to frontier
-    frontier.append(RouteNode(traffic_network.get_node_from_scats_number(origin), NULL))
+    frontier.append(RouteNode(traffic_network.get_node_from_scats_number(origin), NULL, date))
     while len(frontier) > 0:
         # sort the frontier by the path cost
         frontier.sort(key=lambda x: x.cost)
@@ -244,7 +239,7 @@ def find_routes(traffic_network: TrafficGraph, origin: int, destination: int, ro
 
 if __name__ == "__main__":
     traffic_network = open_road_network(TRAFFIC_NETWORK_FILE)
-    routes = find_routes(traffic_network, 970, 4321, route_options_count=5)
+    routes = find_routes(traffic_network, 970, 4321, datetime.datetime.now(), route_options_count=5)
     for i, r in enumerate(routes):
         print (f"--ROUTE {i + 1}--")
         r.print_route()
