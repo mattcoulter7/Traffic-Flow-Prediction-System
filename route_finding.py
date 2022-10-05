@@ -92,10 +92,12 @@ class RouteNode:
     node: Node
     previous_node: Self
     cost: float
+    date: datetime
 
     def __init__(self, node: Self, previous_node: Self, date: datetime) -> None:
         self.node = node
         self.previous_node = previous_node
+        self.date = date
         self.cost = self.calcuate_node_cost(date)
         #print(self.node.name, self.cost)
 

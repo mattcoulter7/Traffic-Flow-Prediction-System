@@ -5,7 +5,7 @@ from TrafficData.TimeModel.TrafficFlowPredictionModel import TrafficFlowPredicti
 
 traffic_flow_model:TrafficFlowPredictionModel = TrafficFlowPredictionModel()
 
-def predict_traffic_flow(location: string,date: datetime):
+def predict_traffic_flow(location: string, date: datetime):
     weekday = date.weekday() # determine weekday
     time = date.hour * 60 + date.minute # determine time in minutes
     time = 15 * math.floor(time / 15) # get current 15 minute interval
