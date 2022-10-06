@@ -1,4 +1,3 @@
-from asyncio.windows_events import NULL
 from cmath import sqrt
 from distutils.log import debug
 import string
@@ -14,6 +13,8 @@ from enum import Enum
 from operator import attrgetter
 from typing import List
 from typing_extensions import Self
+import argparse
+from renderer import renderMap
 
 MAX_SPEED = 60 # estimate to be the speed limit for all roads
 CAPACITY_SPEED = 48
@@ -56,7 +57,7 @@ class TrafficGraph:
     def get_node_from_scats_number(self, scats_number: int) -> Node:
         n = [x for x in self.nodes if x.scats_number == scats_number]
         if len(n) == 0:
-            return NULL
+            return None
 
         return n[0]
 
@@ -104,7 +105,7 @@ class RouteNode:
     def convert_to_route(self) -> Route:
         route = Route(self.cost)
         cur_node: Self = self
-        while cur_node != NULL:
+        while cur_node != None:
             #print (cur_node.node.scats_number)
             route.nodes.append(cur_node.node)
             cur_node = cur_node.previous_node
@@ -120,7 +121,7 @@ class RouteNode:
         return nodes
 
     def calcuate_node_cost(self, date: datetime) -> float:
-        if self.previous_node == NULL:
+        if self.previous_node == None:
             return 0.0
         
         # caclucate the cost to travel to the previous node
@@ -189,7 +190,7 @@ def find_routes(traffic_network: TrafficGraph, origin: int, destination: int, da
     destination_node = traffic_network.get_node_from_scats_number(destination)
     frontier = list()
     # add origin to frontier
-    frontier.append(RouteNode(traffic_network.get_node_from_scats_number(origin), NULL, date))
+    frontier.append(RouteNode(traffic_network.get_node_from_scats_number(origin), None, date))
     while len(frontier) > 0:
         # sort the frontier by the path cost
         frontier.sort(key=lambda x: x.cost)
@@ -222,7 +223,7 @@ def find_routes(traffic_network: TrafficGraph, origin: int, destination: int, da
             new_node: Node = c.node
             previous_node: RouteNode = c.previous_node
             duplicated = False
-            while previous_node != NULL:
+            while previous_node != None:
                 if new_node == previous_node.node:
                     # duplicated node
                     #print("duplicated")
@@ -241,9 +242,33 @@ def find_routes(traffic_network: TrafficGraph, origin: int, destination: int, da
 
 # display the routes 
 
+
+def createParser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--src",
+        default=970,
+        help="Starting SCATS")
+    parser.add_argument(
+        "--dest",
+        default=3001,
+        help="Finish SCATS")
+    parser.add_argument(
+        "--time",
+        default=datetime.datetime.now(),
+        help="Time of Day")
+    parser.add_argument(
+        "--day",
+        default="6",
+        help="Day Index")
+    args = parser.parse_args()
+    return args
+
 if __name__ == "__main__":
+    args = createParser()
     traffic_network = open_road_network(TRAFFIC_NETWORK_FILE)
-    routes = find_routes(traffic_network, 970, 4321, datetime.datetime.now(), route_options_count=5)
+    routes = find_routes(traffic_network, int(args.src), int(args.dest), args.time, route_options_count=5)
     for i, r in enumerate(routes):
         print (f"--ROUTE {i + 1}--")
         r.print_route()
+    renderMap(routes)
