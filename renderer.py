@@ -1,9 +1,11 @@
 import argparse
 from sys import prefix
 from turtle import color
+import webbrowser
 import folium
 import json
 import csv
+import os
 
 TRAFFIC_NETWORK = 'data/traffic_network.csv'
 
@@ -12,9 +14,6 @@ style = lambda x: {
     'color' : x['properties']['stroke'],
     'weight' : x['properties']['stroke-width']
 }
-
-
-data = [[970,3685,2000,3682,3126,2200,4063,4034,4032,4321],[970,3685,2000,3682,3126,2200,4063,4057,4032,4321],[970,3685,2000,3682,3126,3127,4063,4034,4032,4321],[970,3685,2000,3682,3126,3127,4063,4057,4032,4321],[970,3685,2000,4043,4040,3120,4035,4034,4032,4321]]
 
 def getCoords(scat):
     file = open(TRAFFIC_NETWORK, 'r')
@@ -88,8 +87,6 @@ def renderMap(routes):
     src = routes[0][0]
     dest = routes[0][-1]
 
-    data = [[970,3685,2000,3682,3126,2200,4063,4034,4032,4321],[970,3685,2000,3682,3126,2200,4063,4057,4032,4321],[970,3685,2000,3682,3126,3127,4063,4034,4032,4321],[970,3685,2000,3682,3126,3127,4063,4057,4032,4321],[970,3685,2000,4043,4040,3120,4035,4034,4032,4321]]
-
     routes = generateGeoJson(routes)
 
     # create map
@@ -107,47 +104,4 @@ def renderMap(routes):
 
     # save to file
     map.save("index.html")
-
-# def main():
-#     parser = argparse.ArgumentParser()
-#     parser.add_argument(
-#         "--src",
-#         default="0970",
-#         help="Starting SCATS")
-#     parser.add_argument(
-#         "--dest",
-#         default="3001",
-#         help="Finish SCATS")
-#     parser.add_argument(
-#         "--time",
-#         default="0.25",
-#         help="Time of Day")
-#     parser.add_argument(
-#         "--day",
-#         default="6",
-#         help="Day Index")
-#     args = parser.parse_args()
-
-#     # call search agorithm
-#     # return best 5 routes
-#     # generate geojson data
-#     routes = generateGeoJson(data)
-
-#     # create map
-#     map = folium.Map(location=[-37.831219, 145.056965], zoom_start=13, tiles="cartodbpositron", zoom_control=False,
-#                scrollWheelZoom=False,
-#                dragging=False)
-    
-#     # plot data
-#     folium.GeoJson(routes, style_function=style).add_to(map)
-
-#     drawMarkers(map, 970, 4321)
-
-#     drawNodes(map)
-
-
-#     # save to file
-#     map.save("index.html")
-
-
-#main()
+    webbrowser.open_new_tab('file://' + os.path.realpath('index.html'))
