@@ -271,13 +271,12 @@ def createParser():
     return args
 
 if __name__ == "__main__":
-    a = []
+    scatsList = []
     args = createParser()
     traffic_network = open_road_network(TRAFFIC_NETWORK_FILE)
     routes = find_routes(traffic_network, int(args.src), int(args.dest), args.time, route_options_count=5)
     for i, r in enumerate(routes):
         print (f"--ROUTE {i + 1}--")
         r.print_route()
-        a.append(r.list_scats())
-    print(a)
-    renderMap(a)
+        scatsList.append(r.list_scats())
+    renderMap(scatsList)
