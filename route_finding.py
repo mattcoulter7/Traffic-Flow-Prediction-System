@@ -88,6 +88,12 @@ class Route:
             dist += geopy.distance.geodesic(coords_1, coords_2).km
         return dist
 
+    def list_scats(self):
+        arr = list()
+        for node in self.nodes:
+            arr.append(node.scats_number)
+        return arr
+
 # route Node wraps up the node class and implements functionality to allow for routing for A* graph search
 class RouteNode:
     node: Node
@@ -265,10 +271,13 @@ def createParser():
     return args
 
 if __name__ == "__main__":
+    a = []
     args = createParser()
     traffic_network = open_road_network(TRAFFIC_NETWORK_FILE)
     routes = find_routes(traffic_network, int(args.src), int(args.dest), args.time, route_options_count=5)
     for i, r in enumerate(routes):
         print (f"--ROUTE {i + 1}--")
         r.print_route()
-    renderMap(routes)
+        a.append(r.list_scats())
+    print(a)
+    renderMap(a)

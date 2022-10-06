@@ -85,12 +85,12 @@ def drawNodes(map):
 
 def renderMap(routes):
 
-    for r in routes:
-        print(r)
+    src = routes[0][0]
+    dest = routes[0][-1]
 
     data = [[970,3685,2000,3682,3126,2200,4063,4034,4032,4321],[970,3685,2000,3682,3126,2200,4063,4057,4032,4321],[970,3685,2000,3682,3126,3127,4063,4034,4032,4321],[970,3685,2000,3682,3126,3127,4063,4057,4032,4321],[970,3685,2000,4043,4040,3120,4035,4034,4032,4321]]
 
-    routes = generateGeoJson(data)
+    routes = generateGeoJson(routes)
 
     # create map
     map = folium.Map(location=[-37.831219, 145.056965], zoom_start=13, tiles="cartodbpositron", zoom_control=False,
@@ -100,7 +100,7 @@ def renderMap(routes):
     # plot data
     folium.GeoJson(routes, style_function=style).add_to(map)
 
-    drawMarkers(map, 970, 4321)
+    drawMarkers(map, src, dest)
 
     drawNodes(map)
 
