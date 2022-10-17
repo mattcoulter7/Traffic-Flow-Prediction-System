@@ -104,4 +104,3 @@ def renderMap(routes):
 
     # save to file
     map.save("index.html")
-    webbrowser.open_new_tab('file://' + os.path.realpath('index.html'))

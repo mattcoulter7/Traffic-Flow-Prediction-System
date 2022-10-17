@@ -1,44 +1,80 @@
-# base Class of your App inherits from the App class.
-from kivy.app import App
-# GridLayout arranges children in a matrix.
-from kivy.uix.gridlayout import GridLayout
-# Label is used to label something
-from kivy.uix.label import Label
-# used to take input from users
-from kivy.uix.textinput import TextInput
+import os
+from tkinter import *
+from tkinter.scrolledtext import ScrolledText
+from turtle import width
+import webbrowser
+import route_finding as router
+
+root = Tk()
 
 
+class Window:
+	master = None
+	routesText = None
 
-class LoginScreen(GridLayout):
-	def __init__(self, **var_args):
+	src = StringVar()
+	dest = StringVar()
+
+	def viewRoutes(self):
+		webbrowser.open_new_tab('file://' + os.path.realpath('index.html'))
+
+	def run(self):
+		self.routesText.configure(state=NORMAL)
+		self.routesText.delete(1.0,END)
+		self.routesText.insert(INSERT, "Generating Routes...")
+		self.routesText.configure(state=DISABLED)
 		
-		super(LoginScreen, self).__init__(**var_args)
-		# super function can be used to gain access
-		# to inherited methods from a parent or sibling class
-		# that has been overwritten in a class object.
-		self.cols = 1	 # You can change it accordingly
-		self.add_widget(Label(text ='User Name'))
-		self.username = TextInput(multiline = True)
+		src = int(self.src.get())
+		dest = int(self.dest.get())
+
+		self.routesText.configure(state=NORMAL)
+		self.routesText.delete(1.0,END)
+		self.routesText.insert(INSERT, router.runRouter(src, dest))
+		self.routesText.configure(state=DISABLED)
+		return
 		
-		# multiline is used to take
-		# multiline input if it is true
-		self.add_widget(self.username)
-		self.add_widget(Label(text ='password'))
-		self.password = TextInput(password = True, multiline = False)
+
+	def createWindow(self):
+		self.master.title("Route Navigation")
+		self.master.geometry("400x600")
+		self.master.resizable(False, False)
+		Label(self.master, text="Route Navigation", font='Helvetica 18 bold').pack()
+	
+	def renderElements(self):
+		srcLbl = Label(self.master, width=20, text="Source:")
+		srcInput = Entry(self.master, width=10, text=self.src)
+		destLbl = Label(self.master, width=20, text="Destination:")
+		destInput = Entry(self.master, width=10, text=self.dest)
+
+		# add locations to window
+		srcLbl.pack()
+		srcInput.pack()
+		destLbl.pack()
+		destInput.pack()
+
+
+		# Create the rest of the UI elements
+		generateBtn = Button(self.master, text="Generate", command=self.run)
+
+
+		self.routesText = ScrolledText(self.master, width=50, padx=0)
+
+		displayBtn = Button(self.master, text="View", command=self.viewRoutes)
+
+		# Add the elements to the window
+		generateBtn.pack()
+		self.routesText.pack()
+		self.routesText.configure(state=DISABLED)
+
+		displayBtn.pack()
+
+	def __init__(self, master):
+		self.master = master
+		self.createWindow()
+		self.renderElements()
 		
-		# password true is used to hide it
-		# by * self.add_widget(self.password)
-		self.add_widget(Label(text ='Comfirm password'))
-		self.password = TextInput(password = True, multiline = False)
-		self.add_widget(self.password)
 
 
-# the Base Class of our Kivy App
-class MyApp(App):
-	def build(self):
-		# return a LoginScreen() as a root widget
-		return LoginScreen()
-
-
-if __name__ == '__main__':
-	MyApp().run()
+# keep the window open on the mainloop
+gui = Window(root)
+root.mainloop()

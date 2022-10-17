@@ -72,12 +72,18 @@ class Route:
         self.cost = cost
 
     def print_route(self):
+        directions = ""
         for node in self.nodes:
             print(node.scats_number ,"-" ,node.name)
+            directions += f"{node.scats_number} - {node.name}\n"
         print ("Length:\t\t", len(self.nodes))
+        directions += "Length:\t\t" + str(len(self.nodes)) + "\n"
         print ("Distance:\t", "{:.2f}".format(self.calculate_route_distance()) + "km")
+        directions += "Distance:\t\t" + "{:.2f}".format(self.calculate_route_distance()) + "km\n"
         # convert cost from seconds to minutes
         print ("Cost:\t\t", "{:.2f}".format(self.cost * 60) + "mins")
+        directions += "Cost:\t\t" + "{:.2f}".format(self.cost * 60) + "mins\n\n"
+        return directions
 
     def calculate_route_distance(self) -> float:
         dist = 0.0
@@ -270,13 +276,19 @@ def createParser():
     args = parser.parse_args()
     return args
 
-if __name__ == "__main__":
+def runRouter(src, dest):
+    directions = ""
     scatsList = []
-    args = createParser()
     traffic_network = open_road_network(TRAFFIC_NETWORK_FILE)
-    routes = find_routes(traffic_network, int(args.src), int(args.dest), args.time, route_options_count=5)
+    routes = find_routes(traffic_network, int(src), int(dest), datetime.datetime.now(), route_options_count=5)
     for i, r in enumerate(routes):
         print (f"--ROUTE {i + 1}--")
-        r.print_route()
+        directions += f"--ROUTE {i + 1}--\n"
+        directions += r.print_route()
         scatsList.append(r.list_scats())
     renderMap(scatsList)
+    return directions
+
+if __name__ == "__main__":
+    args = createParser()
+    runRouter(args.src, args.dest)
