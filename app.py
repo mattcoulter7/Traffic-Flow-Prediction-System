@@ -9,7 +9,7 @@ from kivy.uix.textinput import TextInput
 
 
 
-class App(GridLayout):
+class LoginScreen(GridLayout):
 	def __init__(self, **var_args):
 		
 		super(LoginScreen, self).__init__(**var_args)
@@ -37,7 +37,7 @@ class App(GridLayout):
 class MyApp(App):
 	def build(self):
 		# return a LoginScreen() as a root widget
-		return App()
+		return LoginScreen()
 
 
 if __name__ == '__main__':

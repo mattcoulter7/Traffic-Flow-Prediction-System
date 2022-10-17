@@ -153,7 +153,7 @@ class RouteNode:
 
         traffic_speed = 48 - ((8 * sqrt(1800 - flow)) / (5 * sqrt(2)))
         traffic_speed2 = 48 + ((8 * sqrt(1800 - flow)) / ( 5 * sqrt(2)))
-        #print("flow:", flow, "speed 1:", traffic_speed, "speed 2:", traffic_speed2)
+        print("flow:", flow, "speed 1:", traffic_speed, "speed 2:", traffic_speed2)
 
         # select the min speed as traffic can't breach the speed limit
         speed = min(MAX_SPEED, traffic_speed2.real)
@@ -271,12 +271,12 @@ def createParser():
     return args
 
 if __name__ == "__main__":
-    routeList = []
+    scatsList = []
     args = createParser()
     traffic_network = open_road_network(TRAFFIC_NETWORK_FILE)
     routes = find_routes(traffic_network, int(args.src), int(args.dest), args.time, route_options_count=5)
     for i, r in enumerate(routes):
         print (f"--ROUTE {i + 1}--")
         r.print_route()
-        routeList.append(r.list_scats())
-    renderMap(routeList)
+        scatsList.append(r.list_scats())
+    renderMap(scatsList)

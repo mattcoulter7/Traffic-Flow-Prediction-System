@@ -5,6 +5,7 @@ import webbrowser
 import folium
 import json
 import csv
+import os
 
 TRAFFIC_NETWORK = 'data/traffic_network.csv'
 
@@ -13,9 +14,6 @@ style = lambda x: {
     'color' : x['properties']['stroke'],
     'weight' : x['properties']['stroke-width']
 }
-
-
-data = [[970,3685,2000,3682,3126,2200,4063,4034,4032,4321],[970,3685,2000,3682,3126,2200,4063,4057,4032,4321],[970,3685,2000,3682,3126,3127,4063,4034,4032,4321],[970,3685,2000,3682,3126,3127,4063,4057,4032,4321],[970,3685,2000,4043,4040,3120,4035,4034,4032,4321]]
 
 def getCoords(scat):
     file = open(TRAFFIC_NETWORK, 'r')
@@ -89,8 +87,6 @@ def renderMap(routes):
     src = routes[0][0]
     dest = routes[0][-1]
 
-    data = [[970,3685,2000,3682,3126,2200,4063,4034,4032,4321],[970,3685,2000,3682,3126,2200,4063,4057,4032,4321],[970,3685,2000,3682,3126,3127,4063,4034,4032,4321],[970,3685,2000,3682,3126,3127,4063,4057,4032,4321],[970,3685,2000,4043,4040,3120,4035,4034,4032,4321]]
-
     routes = generateGeoJson(routes)
 
     # create map
@@ -108,3 +104,4 @@ def renderMap(routes):
 
     # save to file
     map.save("index.html")
+    webbrowser.open_new_tab('file://' + os.path.realpath('index.html'))
