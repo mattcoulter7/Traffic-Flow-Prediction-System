@@ -1,0 +1,11 @@
+2820 calculated connection 2825 but shouldnt have
+3662 did not find connection to 4324
+3662 calculated connection 4323 but shouldnt have
+3685 did not find connection to 0970
+3685 calculated connection 970 but shouldnt have
+4324 did not find connection to 4335
+4324 calculated connection 4323 but shouldnt have
+4324 calculated connection 4264 but shouldnt have
+4335 did not find connection to 4324
+4335 calculated connection 4323 but shouldnt have
+4323 calculated connection 3662 but shouldnt have
