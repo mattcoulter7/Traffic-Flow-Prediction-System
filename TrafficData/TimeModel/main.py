@@ -101,7 +101,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--location",
-        default="0970",
+        default="4324",
         help="SCATS Number")
     parser.add_argument(
         "--dayindex",
@@ -122,6 +122,8 @@ def main():
     dayindex = int(args.dayindex)
 
     _, _, _, _,_,_,X,y_location,flow_scaler, scats_scalar,days_scalar,times_scalar = process_data(file1, file2,scats_id=location,day=dayindex)
+    if len(y_location) == 0:
+        y_location = np.array([[0.000001] for i in range(96)])
     y_location = flow_scaler.inverse_transform(y_location.reshape(-1, 1)).reshape(1, -1)[0]
 
     days = days_scalar.transform(np.array([dayindex for _ in range(96)]).reshape(-1,1)).reshape(1,-1)[0]

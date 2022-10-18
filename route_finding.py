@@ -22,7 +22,7 @@ FREE_FLOW_SPEED = 48 * 2
 MAX_FLOW_RATE = 1800
 JAM_DENSITY = 150
 ITERSECTION_WAIT_TIME = 30 / 60 / 60 # approximate an average wait time of 30 seconds for each intersection this is converted to hours
-TRAFFIC_NETWORK_FILE = "data/traffic_network.csv"
+TRAFFIC_NETWORK_FILE = "data/traffic_network2.csv"
 
 # enum for each type of scats site
 class SiteType(Enum):
