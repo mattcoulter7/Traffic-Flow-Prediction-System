@@ -8,7 +8,7 @@ import random
 from sys import float_repr_style
 from turtle import distance
 import geopy.distance
-from TrafficData.TrafficFlowPredictor import TrafficFlowPredictor
+from TrafficData.TrafficFlowPredictor import TrafficFlowPredictor,TrafficFlowModelsEnum
 from enum import Enum
 from operator import attrgetter
 from typing import List
@@ -152,7 +152,7 @@ class RouteNode:
         # flow the number of vehicles passing over a point over a period of time
         # add the cost to the predition so the traffic times are slightly more accurate
         new_date_time = date + datetime.timedelta(hours=self.previous_node.cost)
-        flow = predictor.predict_traffic_flow(self.previous_node.node.scats_number, new_date_time,4,"average")
+        flow = predictor.predict_traffic_flow(self.previous_node.node.scats_number, new_date_time,4,TrafficFlowModelsEnum.average)
         #random.seed(self.previous_node.node.scats_number + time.minute)
         #flow = random.randint(0, 1800)
 

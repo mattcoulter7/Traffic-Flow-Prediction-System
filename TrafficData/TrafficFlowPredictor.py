@@ -11,8 +11,16 @@ from TrafficData.SingleModelScats.data.data import process_data_datetime,process
 from keras.models import load_model
 warnings.filterwarnings("ignore")
 
-class TrafficFlowPredictor():
+class TrafficFlowModelsEnum:
+    lstm = 'lstm'
+    gru = 'gru'
+    saes = 'saes'
+    new_saes = 'new_saes'
+    rnn = 'rnn'
+    average = 'average'
 
+
+class TrafficFlowPredictor():
     def __init__(self):
         self.models = {}
 
