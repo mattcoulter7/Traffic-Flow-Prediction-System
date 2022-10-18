@@ -5,6 +5,7 @@ import sys
 import warnings
 import argparse
 import numpy as np
+import os
 import pandas as pd
 from data.data import process_data
 from model import model
@@ -33,9 +34,9 @@ def train_model(model, X_train, y_train, name, config):
         epochs=config["epochs"],
         validation_split=0.05)
 
-    model.save('model/' + name + '.h5')
+    model.save(os.path.join(os.path.dirname(__file__),'model',f'{name}.h5'))
     df = pd.DataFrame.from_dict(hist.history)
-    df.to_csv('model/' + name + ' loss.csv', encoding='utf-8', index=False)
+    df.to_csv(os.path.join(os.path.dirname(__file__),'model',f'{name} loss.csv.h5'), encoding='utf-8', index=False)
 
 
 def train_seas(models, X_train, y_train, name, config):
@@ -78,8 +79,8 @@ def train_seas(models, X_train, y_train, name, config):
 
 def main(argv):
     config = {"batch": 128, "epochs": 10}
-    file1 = 'data/train-data.csv'
-    file2 = 'data/test-data.csv'
+    file1 = os.path.join(os.path.dirname(__file__),'data','train-data.csv')
+    file2 = os.path.join(os.path.dirname(__file__),'data','test-data.csv')
     X_train, y_train, _, _, _,_,_,_,_,_,_,_ = process_data(file1, file2)
 
     # train each type of model

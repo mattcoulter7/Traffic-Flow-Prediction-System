@@ -10,7 +10,7 @@ import string
 import os
 
 from sklearn.preprocessing import MinMaxScaler
-from .data.data import process_data
+from data.data import process_data
 from keras.models import load_model
 from keras.utils.vis_utils import plot_model
 import sklearn.metrics as metrics
@@ -109,14 +109,14 @@ def main():
         help="Day index")
     args = parser.parse_args()
 
-    lstm = load_model('model/lstm.h5')
-    gru = tf.compat.v1.keras.models.load_model('model/gru.h5')
-    saes = load_model('model/saes.h5')
+    lstm = load_model(os.path.join(os.path.dirname(__file__),'model','lstm.h5'))
+    gru = load_model(os.path.join(os.path.dirname(__file__),'model','gru.h5'))
+    saes = load_model(os.path.join(os.path.dirname(__file__),'model','gru.h5'))
     models = [lstm, gru, saes]
     names = ['LSTM', 'GRU', 'SAEs']
 
-    file1 = 'data/train-data.csv'
-    file2 = 'data/test-data.csv'
+    file1 = os.path.join(os.path.dirname(__file__),'data','train-data.csv')
+    file2 = os.path.join(os.path.dirname(__file__),'data','test-data.csv')
 
     location = int(args.location)
     dayindex = int(args.dayindex)
@@ -137,7 +137,7 @@ def main():
             X = np.reshape(X, (X.shape[0], X.shape[1]))
         else:
             X = np.reshape(X, (X.shape[0], X.shape[1], 1))
-        file = 'images/' + name + '.png'
+        file = os.path.join(os.path.dirname(__file__),'images',name + '.png')
         plot_model(model, to_file=file, show_shapes=True)
         predicted = model.predict(X)
         predicted = flow_scaler.inverse_transform(predicted.reshape(-1, 1)).reshape(1, -1)[0]
