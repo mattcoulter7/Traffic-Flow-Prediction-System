@@ -4,9 +4,10 @@ Traffic Flow Prediction with Neural Networks(SAEs、LSTM、GRU).
 import math
 import warnings
 import argparse
+import os
 import numpy as np
 import pandas as pd
-from data.data import process_data
+from data.data import process_data_series,process_data_datetime
 from keras.models import load_model
 from keras.utils.vis_utils import plot_model
 import sklearn.metrics as metrics
@@ -98,39 +99,61 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--location",
-        default="0970",
+        default="4323",
         help="SCATS Number")
+    parser.add_argument(
+        "--dayindex",
+        default="6",
+        help="Day index")
     args = parser.parse_args()
 
-    lstm = load_model('model/lstm.h5')
-    gru = tf.compat.v1.keras.models.load_model('model/gru.h5')
-    saes = load_model('model/saes.h5')
-    new_saes = load_model('model/new_saes.h5')
-    models = [lstm, gru, saes,new_saes]
-    names = ['LSTM', 'GRU', 'SAEs','SAEsV2']
+    lstm = load_model(os.path.join(os.path.dirname(__file__),'model','lstm.h5'))
+    gru = tf.compat.v1.keras.models.load_model(os.path.join(os.path.dirname(__file__),'model','gru.h5'))
+    saes = load_model(os.path.join(os.path.dirname(__file__),'model','saes.h5'))
+    new_saes = load_model(os.path.join(os.path.dirname(__file__),'model','new_saes.h5'))
+    rnn = load_model(os.path.join(os.path.dirname(__file__),'model','rnn.h5'))
+    average = load_model(os.path.join(os.path.dirname(__file__),'model','average.h5'))
+
+    models = [lstm, gru, saes,new_saes,rnn,average]
+    names = ['LSTM', 'GRU', 'SAEs','SAEsV2','RNN','average']
 
     lag = 12
-    file1 = 'data/train-data.csv'
-    file2 = 'data/test-data.csv'
-    _, _, _, _, _,_,X_location,y_location,flow_scaler,scats_scalar = process_data(file1, file2, lag,scats_id=args.location)
-    y_location = flow_scaler.inverse_transform(y_location.reshape(-1, 1)).reshape(1, -1)[0]
+    file1 = os.path.join(os.path.dirname(__file__),'data','train-data.csv')
+    file2 = os.path.join(os.path.dirname(__file__),'data','test-data.csv')
+    
+    location = int(args.location)
+    dayindex = int(args.dayindex)
+
+    _, _, _, _, _,_,X_location_series,y_location_series,flow_scaler,scats_scalar = process_data_series(file1, file2, lag,scats_id=location)
+    _, _, _, _,_,_,X_location_datetime,y_location_datetime,flow_scaler, scats_scalar,days_scalar,times_scalar = process_data_datetime(file1, file2,scats_id=location,day=dayindex)
+
+    y_location_series = flow_scaler.inverse_transform(y_location_series.reshape(-1, 1)).reshape(1, -1)[0]
+    y_location_datetime = flow_scaler.inverse_transform(y_location_datetime.reshape(-1, 1)).reshape(1, -1)[0]
 
     y_preds = []
     for name, model in zip(names, models):
         if name == 'SAEs':
-            X_location = np.reshape(X_location, (X_location.shape[0], X_location.shape[1]))
+            X_location_series = np.reshape(X_location_series, (X_location_series.shape[0], X_location_series.shape[1]))
         else:
-            X_location = np.reshape(X_location, (X_location.shape[0], X_location.shape[1], 1))
-        file = 'images/' + name + '.png'
+            X_location_series = np.reshape(X_location_series, (X_location_series.shape[0], X_location_series.shape[1], 1))
+            X_location_datetime = np.reshape(X_location_datetime, (X_location_datetime.shape[0], X_location_datetime.shape[1], 1))
+        
+        file = os.path.join(os.path.dirname(__file__),'images',name + '.png')
         plot_model(model, to_file=file, show_shapes=True)
-        predicted = model.predict(X_location)
+        
+        predicted = None
+        if name == 'average':
+            predicted = model.predict(X_location_datetime)
+            eva_regress(y_location_datetime, predicted)
+        else:
+            predicted = model.predict(X_location_series)
+            eva_regress(y_location_series, predicted)
         predicted = flow_scaler.inverse_transform(predicted.reshape(-1, 1)).reshape(1, -1)[0]
+        
         y_preds.append(predicted[:96])
         print(name)
-        #print("predicted:", predicted, "\nx_loc:", X_location, "\ny_preds", y_preds)
-        eva_regress(y_location, predicted)
 
-    plot_results(y_location[: 96], y_preds, names)
+    plot_results(y_location_series[:96], y_preds, names)
 
 
 if __name__ == '__main__':

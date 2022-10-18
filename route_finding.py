@@ -9,7 +9,7 @@ import random
 from sys import float_repr_style
 from turtle import distance
 import geopy.distance
-from TrafficData.TrafficData import predict_traffic_flow
+from TrafficData.TrafficFlowPredictor import TrafficFlowPredictor
 from enum import Enum
 from operator import attrgetter
 from typing import List
@@ -22,6 +22,8 @@ MAX_FLOW_RATE = 1800
 JAM_DENSITY = 150
 ITERSECTION_WAIT_TIME = 30 / 60 / 60 # approximate an average wait time of 30 seconds for each intersection this is converted to hours
 TRAFFIC_NETWORK_FILE = "data/traffic_network.csv"
+
+predictor = TrafficFlowPredictor()
 
 # enum for each type of scats site
 class SiteType(Enum):
@@ -137,7 +139,7 @@ class RouteNode:
         # flow the number of vehicles passing over a point over a period of time
         # add the cost to the predition so the traffic times are slightly more accurate
         new_date_time = date + datetime.timedelta(hours=self.previous_node.cost)
-        flow = predict_traffic_flow(self.previous_node.node.scats_number, new_date_time)
+        flow = predictor.predict_traffic_flow(self.previous_node.node.scats_number, new_date_time,4,"average")
         #random.seed(self.previous_node.node.scats_number + time.minute)
         #flow = random.randint(0, 1800)
 
@@ -243,7 +245,7 @@ def find_routes(traffic_network: TrafficGraph, origin: int, destination: int, da
 
 if __name__ == "__main__":
     traffic_network = open_road_network(TRAFFIC_NETWORK_FILE)
-    routes = find_routes(traffic_network, 970, 4321, datetime.datetime.now(), route_options_count=5)
+    routes = find_routes(traffic_network, 4323,3002, datetime.datetime.now(), route_options_count=5)
     for i, r in enumerate(routes):
         print (f"--ROUTE {i + 1}--")
         r.print_route()

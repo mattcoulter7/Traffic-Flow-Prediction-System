@@ -1,11 +1,13 @@
 import csv
-
-data = "data/OriginalDataset.csv"
-
-output = "data/TrainingDataAdaptedOutput.csv"
+import os
 
 fields = ['Time', 'Flow', 'Points', 'Observed']
 
+data = os.path.join(os.path.dirname(__file__),'OriginalDataset.csv')
+output = os.path.join(os.path.dirname(__file__),'TrainingDataAdaptedOutput.csv')
+
+train_dir = os.path.join(os.path.dirname(__file__),'train-data.csv')
+test_dir = os.path.join(os.path.dirname(__file__),'test-data.csv')
 
 reader = csv.reader(open(data, 'r'))
 train_writer = csv.writer(open(output, 'w', newline=''))
@@ -32,7 +34,7 @@ for row in reader:
             train_writer.writerow(values)
             values = []
 
-fid = open("data/TrainingDataAdaptedOutput.csv", "r")
+fid = open(output, "r")
 li = fid.readlines()
 
 test_data_size = 72000
@@ -47,10 +49,10 @@ test.insert(0,header)
 
 fid.close()
 
-train_file = open("data/train-data.csv", "w")
+train_file = open(train_dir, "w")
 train_file.writelines(train)
 train_file.close()
 
-test_file = open("data/test-data.csv", "w")
+test_file = open(test_dir, "w")
 test_file.writelines(test)
 test_file.close()
