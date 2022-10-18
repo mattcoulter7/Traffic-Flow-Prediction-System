@@ -30,6 +30,7 @@ class TrafficFlowPredictionModel():
         _, _, _, _,_,_,_,_,self.flow_scaler, self.scats_scaler,self.days_scaler,self.times_scaler = process_data(file1, file2)
 
     def predict_traffic_flow(self,location: int,dayindex: int,time:int,steps:int = 1,model_name: string = "lstm"):
+        print(f'location: {location}, day: {dayindex},time: {time}')
         model = self.get_model(model_name)
 
         days = self.days_scaler.transform(np.array([dayindex for _ in range(steps)]).reshape(-1,1)).reshape(1,-1)[0]

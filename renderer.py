@@ -7,7 +7,7 @@ import json
 import csv
 import os
 
-TRAFFIC_NETWORK = 'data/traffic_network.csv'
+TRAFFIC_NETWORK = 'data/traffic_network2.csv'
 
 
 style = lambda x: {
