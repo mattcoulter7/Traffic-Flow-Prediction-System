@@ -280,6 +280,9 @@ def runRouter(src, dest):
     directions = ""
     scatsList = []
     traffic_network = open_road_network(TRAFFIC_NETWORK_FILE)
+    print(traffic_network.get_node_from_scats_number(int(src)))
+    if traffic_network.get_node_from_scats_number(int(src)) == None or traffic_network.get_node_from_scats_number(int(dest)) == None:
+        return "Invalid SCATS Number"
     routes = find_routes(traffic_network, int(src), int(dest), datetime.datetime.now(), route_options_count=5)
     for i, r in enumerate(routes):
         print (f"--ROUTE {i + 1}--")
