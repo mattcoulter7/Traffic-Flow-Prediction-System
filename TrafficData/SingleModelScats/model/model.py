@@ -2,7 +2,7 @@
 Defination of NN model
 """
 from keras.layers import Dense, Dropout, Activation,InputLayer
-from keras.layers import LSTM, GRU
+from keras.layers import LSTM, GRU, RNN
 from keras.models import Sequential
 
 
@@ -38,6 +38,24 @@ def get_gru(units):
     model = Sequential()
     model.add(GRU(units[1], input_shape=(units[0], 1), return_sequences=True, reset_after=True))
     model.add(GRU(units[2]))
+    model.add(Dropout(0.2))
+    model.add(Dense(units[3], activation='sigmoid'))
+
+    return model
+
+def get_rnn(units):
+    """LSTM(Long Short-Term Memory)
+    Build LSTM Model.
+
+    # Arguments
+        units: List(int), number of input, output and hidden units.
+    # Returns
+        model: Model, nn model.
+    """
+
+    model = Sequential()
+    model.add(RNN(units[1], input_shape=(units[0], 1), return_sequences=True))
+    model.add(RNN(units[2]))
     model.add(Dropout(0.2))
     model.add(Dense(units[3], activation='sigmoid'))
 
@@ -114,3 +132,20 @@ def get_new_saes(inputs, output, auto_encoder_count = 3, encoder_size = 5,fine_t
     saes.add(Dense(output, activation='sigmoid'))
 
     return saes
+    
+def get_average(units):
+    model = Sequential()
+    # input
+
+    for i in range(len(units) - 1):
+        dim = units[i]
+        if i==0:
+            model.add(InputLayer(dim))
+        else:
+            model.add(Dense(dim, name=f'hidden{i}')) # encode
+            model.add(Activation('ReLU'))
+    
+    model.add(Dropout(0.2))
+    model.add(Dense(units[len(units) - 1], activation='sigmoid'))
+
+    return model
