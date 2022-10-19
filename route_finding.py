@@ -17,10 +17,10 @@ import argparse
 from renderer import renderMap
 
 MAX_SPEED = 60 # estimate to be the speed limit for all roads
-CAPACITY_SPEED = 48
-FREE_FLOW_SPEED = 48 * 2
-MAX_FLOW_RATE = 1800
-JAM_DENSITY = 150
+CAPACITY_SPEED = 31 # canvas says 48
+MAX_FLOW_RATE = 800 # canvas says 1800
+A = -MAX_FLOW_RATE / (CAPACITY_SPEED * CAPACITY_SPEED)
+B = -2 * CAPACITY_SPEED * A
 ITERSECTION_WAIT_TIME = 30 / 60 / 60 # approximate an average wait time of 30 seconds for each intersection this is converted to hours
 TRAFFIC_NETWORK_FILE = "data/traffic_network2.csv"
 
@@ -159,15 +159,7 @@ class RouteNode:
         #random.seed(self.previous_node.node.scats_number + time.minute)
         #flow = random.randint(0, 1800)
 
-        # clamp the flow value 1800
-        flow = numpy.clip(flow, 0, 1800)
-
-        traffic_speed = 48 - ((8 * sqrt(1800 - flow)) / (5 * sqrt(2)))
-        traffic_speed2 = 48 + ((8 * sqrt(1800 - flow)) / ( 5 * sqrt(2)))
-        print("flow:", flow, "speed 1:", traffic_speed, "speed 2:", traffic_speed2)
-
-        # select the min speed as traffic can't breach the speed limit
-        speed = min(MAX_SPEED, traffic_speed2.real)
+        speed = convert_flow_to_speed(flow)
         
         # calculate segment time in seconds
         segment_time = dist / speed
@@ -177,7 +169,18 @@ class RouteNode:
 
         return cost
 
+def convert_flow_to_speed(flow: float, over_capacity: bool = False) -> float:
+    # clamp the flow value to the flow capacity
+    clamped_flow = numpy.clip(flow, 0, MAX_FLOW_RATE)
+    
+    if over_capacity:
+        traffic_speed = (-B + sqrt(B*B+4*A*clamped_flow)) / (2 * A)
+    else:
+        traffic_speed = (-B - sqrt(B*B+4*A*clamped_flow)) / (2 * A)
+    print("flow:", flow, "speed:", traffic_speed.real)
 
+    # select the min speed as traffic can't breach the speed limit
+    return min(MAX_SPEED, traffic_speed.real)
 
 # open the route file 
 def open_road_network(file: string) -> TrafficGraph:
