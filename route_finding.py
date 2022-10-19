@@ -108,12 +108,14 @@ class RouteNode:
     previous_node: Self
     cost: float
     date: datetime
+    model_type: string
 
-    def __init__(self, node: Self, previous_node: Self, date: datetime) -> None:
+    def __init__(self, node: Self, previous_node: Self, date: datetime, model_type: string) -> None:
         self.node = node
         self.previous_node = previous_node
         self.date = date
-        self.cost = self.calcuate_node_cost(date)
+        self.model_type = model_type
+        self.cost = self.calcuate_node_cost(date, model_type)
         #print(self.node.name, self.cost)
 
     def convert_to_route(self) -> Route:
@@ -131,10 +133,10 @@ class RouteNode:
     def expand_node(self, traffic_network: TrafficGraph) -> list:
         nodes = list()
         for n in self.node.neighbours:
-            nodes.append(RouteNode(traffic_network.get_node_from_scats_number(n), self, self.date))
+            nodes.append(RouteNode(traffic_network.get_node_from_scats_number(n), self, self.date, self.model_type))
         return nodes
 
-    def calcuate_node_cost(self, date: datetime) -> float:
+    def calcuate_node_cost(self, date: datetime, model_type: string) -> float:
         if self.previous_node == None:
             return 0.0
         
@@ -152,7 +154,8 @@ class RouteNode:
         # flow the number of vehicles passing over a point over a period of time
         # add the cost to the predition so the traffic times are slightly more accurate
         new_date_time = date + datetime.timedelta(hours=self.previous_node.cost)
-        flow = predictor.predict_traffic_flow(self.previous_node.node.scats_number, new_date_time,4,TrafficFlowModelsEnum.average)
+        print("model type here: " + model_type)
+        flow = predictor.predict_traffic_flow(self.previous_node.node.scats_number, new_date_time,4,model_type)
         #random.seed(self.previous_node.node.scats_number + time.minute)
         #flow = random.randint(0, 1800)
 
@@ -199,12 +202,12 @@ def open_road_network(file: string) -> TrafficGraph:
     return tg
 
 # a-star algorithm 
-def find_routes(traffic_network: TrafficGraph, origin: int, destination: int, date: datetime, route_options_count: int = 5) -> list:
+def find_routes(traffic_network: TrafficGraph, origin: int, destination: int, date: datetime, model_type: string, route_options_count: int = 5) -> list:
     routes = list()
     destination_node = traffic_network.get_node_from_scats_number(destination)
     frontier = list()
     # add origin to frontier
-    frontier.append(RouteNode(traffic_network.get_node_from_scats_number(origin), None, date))
+    frontier.append(RouteNode(traffic_network.get_node_from_scats_number(origin), None, date, model_type))
     while len(frontier) > 0:
         # sort the frontier by the path cost
         frontier.sort(key=lambda x: x.cost)
@@ -278,14 +281,15 @@ def createParser():
     args = parser.parse_args()
     return args
 
-def runRouter(src, dest):
+def runRouter(src, dest, model: string):
+    model_type = model
     directions = ""
     scatsList = []
     traffic_network = open_road_network(TRAFFIC_NETWORK_FILE)
     print(traffic_network.get_node_from_scats_number(int(src)))
     if traffic_network.get_node_from_scats_number(int(src)) == None or traffic_network.get_node_from_scats_number(int(dest)) == None:
         return "Invalid SCATS Number"
-    routes = find_routes(traffic_network, int(src), int(dest), datetime.datetime.now(), route_options_count=5)
+    routes = find_routes(traffic_network, int(src), int(dest), datetime.datetime.now(), model_type, route_options_count=5)
     for i, r in enumerate(routes):
         print (f"--ROUTE {i + 1}--")
         directions += f"--ROUTE {i + 1}--\n"
