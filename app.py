@@ -32,8 +32,12 @@ class Window:
 	def run(self):
 		self.setTextBox("Generating Routes...")
 
-		src = int(self.src.get())
-		dest = int(self.dest.get())
+		src = self.src.get()
+		dest = self.dest.get()
+
+		if src == '' or dest == '':
+			self.setTextBox("Please enter SCATS")
+			return
 		
 		routes = router.runRouter(src, dest, self.model.get())
 		self.setTextBox(routes)
@@ -42,8 +46,17 @@ class Window:
 	def predictFlow(self):
 		self.setTextBox("Predicting...")
 		point = str(self.pred.get())
+
+		if point == '':
+			self.setTextBox("Please enter SCATS")
+			return
+
 		predictor = TrafficFlowPredictor()
-		flow = predictor.predict_traffic_flow(point, datetime.datetime.now(), 4, self.model.get())
+		try:
+			flow = predictor.predict_traffic_flow(point, datetime.datetime.now(), 4, self.model.get())
+		except:
+			self.setTextBox("Invalid SCATS")
+			return
 		self.setTextBox(f"--Predicted Traffic Flow--\nSCATS:\t\t{point}\nTime:\t\t{datetime.datetime.now().strftime('%Y/%m/%d %I:%M:%S')}\nPrediction:\t\t{str(flow)}veh/hr")
 		return
 
