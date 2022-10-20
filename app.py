@@ -50,7 +50,7 @@ class Window:
 	def createWindow(self):
 		self.master.title("Route Navigation")
 		self.master.geometry("400x630")
-		self.master.resizable(False, False)
+		self.master.resizable(False, True)
 		Label(self.master, text="Route Navigation", font='Helvetica 18 bold').pack()
 	
 	def renderElements(self):
