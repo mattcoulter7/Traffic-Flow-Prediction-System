@@ -36,7 +36,7 @@ def train_model(model, X_train, y_train, name, config):
 
     model.save(os.path.join(os.path.dirname(__file__),'model',f'{name}.h5'))
     df = pd.DataFrame.from_dict(hist.history)
-    df.to_csv(os.path.join(os.path.dirname(__file__),'model',f'{name} loss.csv.h5'), encoding='utf-8', index=False)
+    df.to_csv(os.path.join(os.path.dirname(__file__),'model',f'{name} loss.csv'), encoding='utf-8', index=False)
 
 
 def train_seas(models, X_train, y_train, name, config):
@@ -87,7 +87,7 @@ def main(argv):
     X_train_datetime, y_train_datetime, _, _, _,_,_,_,_,_,_,_ = process_data_datetime(file1, file2)
 
     # train each type of model
-    models_types = ['lstm','rnn','gru','saes','new_saes','average']
+    models_types = ['average'] #,'rnn','gru','saes','new_saes','average']
     for model_type in models_types:
         if model_type == 'lstm':
             X_train_series = np.reshape(X_train_series, (X_train_series.shape[0], X_train_series.shape[1], 1))

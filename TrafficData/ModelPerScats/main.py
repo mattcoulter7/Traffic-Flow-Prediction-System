@@ -8,7 +8,7 @@ import warnings
 import argparse
 import numpy as np
 import pandas as pd
-from data.data import process_data
+from data.data import process_data_series,process_data_datetime
 from keras.models import load_model
 from keras.utils.vis_utils import plot_model
 import sklearn.metrics as metrics
@@ -102,43 +102,67 @@ def main(argv):
         "--location",
         default="0970",
         help="SCATS Number")
+    parser.add_argument(
+        "--dayindex",
+        default="0",
+        help="Day index")
     args = parser.parse_args()
 
-    lstm_model_path = f'model/location_models/{args.location}-lstm.h5'
-    lstm = load_model(lstm_model_path) if os.path.exists(lstm_model_path) else None
+    lstm_path = os.path.join(os.path.dirname(__file__),'model','location_models',f'{args.location}-lstm.h5')
+    lstm = load_model(lstm_path) if os.path.exists(lstm_path) else None
+    gru_path = os.path.join(os.path.dirname(__file__),'model','location_models',f'{args.location}-gru.h5')
+    gru = load_model(gru_path) if os.path.exists(gru_path) else None
+    saes_path = os.path.join(os.path.dirname(__file__),'model','location_models',f'{args.location}-saes.h5')
+    saes = load_model(saes_path) if os.path.exists(saes_path) else None
+    new_saes_path = os.path.join(os.path.dirname(__file__),'model','location_models',f'{args.location}-new_saes.h5')
+    new_saes = load_model(new_saes_path) if os.path.exists(new_saes_path) else None
+    rnn_path = os.path.join(os.path.dirname(__file__),'model','location_models',f'{args.location}-lstm.h5')
+    rnn = load_model(rnn_path) if os.path.exists(rnn_path) else None
+    average_path = os.path.join(os.path.dirname(__file__),'model','location_models',f'{args.location}-lstm.h5')
+    average = load_model(average_path) if os.path.exists(average_path) else None
 
-    gru_model_path = f'model/location_models/{args.location}-gru.h5'
-    gru = tf.compat.v1.keras.models.load_model(gru_model_path) if os.path.exists(gru_model_path) else None
-
-    saes_model_path = f'model/location_models/{args.location}-saes.h5'
-    saes = load_model(saes_model_path) if os.path.exists(saes_model_path) else None
-
-    models = [lstm, gru, saes]
-    names = ['LSTM', 'GRU', 'SAEs']
+    models = [lstm, gru, saes,new_saes,rnn,average]
+    names = ['LSTM']
 
     lag = 12
-    file1 = f'data/locations/{args.location}-train.csv'
-    file2 = f'data/locations/{args.location}-test.csv'
-    _, _, _, _, X,y,flow_scaler = process_data(file1, file2, lag)
-    y = flow_scaler.inverse_transform(y.reshape(-1, 1)).reshape(1, -1)[0]
+    file1 = os.path.join(os.path.dirname(__file__),'data','locations',f'{args.location}-train.csv')
+    file2 = os.path.join(os.path.dirname(__file__),'data','locations',f'{args.location}-test.csv')
+
+    location = int(args.location)
+    dayindex = int(args.dayindex)
+
+    _, _, _, _,X_series,y_series,flow_scaler = process_data_series(file1, file2, lag)
+    _, _, _, _,_,_,X_datetime,y_datetime,flow_scaler,days_scalar,times_scalar = process_data_datetime(file1, file2,day=dayindex)
+    
+    y_series = flow_scaler.inverse_transform(y_series.reshape(-1, 1)).reshape(1, -1)[0]
+    y_datetime = flow_scaler.inverse_transform(y_datetime.reshape(-1, 1)).reshape(1, -1)[0]
 
     y_preds = []
     for name, model in zip(names, models):
         if model is None: continue
 
         if name == 'SAEs':
-            X = np.reshape(X, (X.shape[0], X.shape[1]))
+            X_series = np.reshape(X_series, (X_series.shape[0], X_series.shape[1]))
         else:
-            X = np.reshape(X, (X.shape[0], X.shape[1], 1))
-        file = 'images/' + name + '.png'
+            X_series = np.reshape(X_series, (X_series.shape[0], X_series.shape[1], 1))
+            X_datetime = np.reshape(X_datetime, (X_datetime.shape[0], X_datetime.shape[1], 1))
+        
+        file = os.path.join(os.path.dirname(__file__),'images',name + '.png')
         plot_model(model, to_file=file, show_shapes=True)
-        predicted = model.predict(X)
+        
+        predicted = None
+        if name == 'average':
+            predicted = model.predict(X_datetime)
+            eva_regress(y_datetime, predicted)
+        else:
+            predicted = model.predict(X_series)
+            eva_regress(y_series, predicted)
         predicted = flow_scaler.inverse_transform(predicted.reshape(-1, 1)).reshape(1, -1)[0]
+        
         y_preds.append(predicted[:96])
         print(name)
-        eva_regress(y, predicted)
 
-    plot_results(y[: 96], y_preds, names)
+    plot_results(y_series[: 96], y_preds, names)
 
 
 if __name__ == '__main__':

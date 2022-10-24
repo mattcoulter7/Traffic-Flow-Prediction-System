@@ -99,23 +99,15 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--location",
-        default="4323",
+        default="4262",
         help="SCATS Number")
     parser.add_argument(
         "--dayindex",
-        default="6",
+        default="6", # sunday
         help="Day index")
     args = parser.parse_args()
 
-    lstm = load_model(os.path.join(os.path.dirname(__file__),'model','lstm.h5'))
-    gru = tf.compat.v1.keras.models.load_model(os.path.join(os.path.dirname(__file__),'model','gru.h5'))
-    saes = load_model(os.path.join(os.path.dirname(__file__),'model','saes.h5'))
-    new_saes = load_model(os.path.join(os.path.dirname(__file__),'model','new_saes.h5'))
-    rnn = load_model(os.path.join(os.path.dirname(__file__),'model','rnn.h5'))
-    average = load_model(os.path.join(os.path.dirname(__file__),'model','average.h5'))
-
-    models = [lstm, gru, saes,new_saes,rnn,average]
-    names = ['LSTM', 'GRU', 'SAEs','SAEsV2','RNN','average']
+    names = ['average'] #, 'gru', 'sales','new_saes','rnn','average']
 
     lag = 12
     file1 = os.path.join(os.path.dirname(__file__),'data','train-data.csv')
@@ -131,18 +123,20 @@ def main():
     y_location_datetime = flow_scaler.inverse_transform(y_location_datetime.reshape(-1, 1)).reshape(1, -1)[0]
 
     y_preds = []
-    for name, model in zip(names, models):
+    for name in names:
+        model = load_model(os.path.join(os.path.dirname(__file__),'model',f'{name}.h5'))
+
         if name == 'SAEs':
             X_location_series = np.reshape(X_location_series, (X_location_series.shape[0], X_location_series.shape[1]))
         else:
             X_location_series = np.reshape(X_location_series, (X_location_series.shape[0], X_location_series.shape[1], 1))
-            X_location_datetime = np.reshape(X_location_datetime, (X_location_datetime.shape[0], X_location_datetime.shape[1], 1))
         
         file = os.path.join(os.path.dirname(__file__),'images',name + '.png')
         plot_model(model, to_file=file, show_shapes=True)
         
         predicted = None
         if name == 'average':
+            X_location_datetime = np.reshape(X_location_datetime, (X_location_datetime.shape[0], X_location_datetime.shape[1], 1))
             predicted = model.predict(X_location_datetime)
             eva_regress(y_location_datetime, predicted)
         else:
