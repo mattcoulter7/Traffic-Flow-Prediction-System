@@ -87,7 +87,7 @@ def get_locations():
 
 def main(argv):
     lag = 12
-    config = {"batch": 128, "epochs": 200}
+    config = {"batch": 128, "epochs": 10}
 
     locations = get_locations()
     for location in locations:
@@ -97,16 +97,17 @@ def main(argv):
         X_train_datetime, y_train_datetime, _, _, _,_,_,_,_,_,_ = process_data_datetime(file1, file2)
 
         # train each type of model
-        models_types = ['lstm']
+        models_types = ['rnn']
+        test_identifier = '10 epochs'
         for model_type in models_types:
-            model_name = f"{location}-{model_type}"
+            model_name = f"{location}-{model_type}" if test_identifier == '' else f"{location}-{model_type} ({test_identifier})"
             if model_type == 'lstm':
                 X_train2 = np.reshape(X_train_series, (X_train_series.shape[0], X_train_series.shape[1], 1))
                 m = model.get_lstm([lag, 64, 64, 1])
                 train_model(m, X_train2, y_train_series, model_name, config)
             if model_type == 'rnn':
                 X_train2 = np.reshape(X_train_series, (X_train_series.shape[0], X_train_series.shape[1], 1))
-                m = model.get_lstm([lag, 64, 64, 1])
+                m = model.get_rnn([lag, 64, 64, 1])
                 train_model(m, X_train2, y_train_series, model_name, config)
             if model_type == 'gru':
                 X_train2 = np.reshape(X_train_series, (X_train_series.shape[0], X_train_series.shape[1], 1))
@@ -116,10 +117,6 @@ def main(argv):
                 X_train2 = np.reshape(X_train_series, (X_train_series.shape[0], X_train_series.shape[1]))
                 m = model.get_saes([lag, 400, 400, 400, 1])
                 train_seas(m, X_train2, y_train_series, model_name, config)
-            if model_type == 'new_saes':
-                X_train2 = np.reshape(X_train_series, (X_train_series.shape[0], X_train_series.shape[1], 1))
-                m = model.get_new_saes(lag,1,encoder_size=10,auto_encoder_count=3, fine_tuning_layers=[10])
-                train_model(m, X_train2, y_train_series, model_name, config)
             if model_type == 'new_saes':
                 X_train2 = np.reshape(X_train_series, (X_train_series.shape[0], X_train_series.shape[1], 1))
                 m = model.get_new_saes(lag,1,encoder_size=10,auto_encoder_count=3, fine_tuning_layers=[10])

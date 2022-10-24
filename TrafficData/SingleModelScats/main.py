@@ -99,7 +99,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--location",
-        default="4262",
+        default="0970",
         help="SCATS Number")
     parser.add_argument(
         "--dayindex",
@@ -107,7 +107,7 @@ def main():
         help="Day index")
     args = parser.parse_args()
 
-    names = ['average'] #, 'gru', 'sales','new_saes','rnn','average']
+    names = ['gru'] #, 'gru', 'sales','new_saes','rnn','average']
 
     lag = 12
     file1 = os.path.join(os.path.dirname(__file__),'data','train-data.csv')

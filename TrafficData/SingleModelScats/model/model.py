@@ -2,7 +2,7 @@
 Defination of NN model
 """
 from keras.layers import Dense, Dropout, Activation,InputLayer
-from keras.layers import LSTM, GRU, RNN
+from keras.layers import LSTM, GRU, SimpleRNN
 from keras.models import Sequential
 
 
@@ -17,10 +17,17 @@ def get_lstm(units):
     """
 
     model = Sequential()
-    model.add(LSTM(units[1], input_shape=(units[0], 1), return_sequences=True))
-    model.add(LSTM(units[2]))
-    model.add(Dropout(0.2))
-    model.add(Dense(units[3], activation='sigmoid'))
+    for i in range(1,len(units)):
+        if i == 1:
+            model.add(LSTM(units[1], input_shape=(units[0], 1), return_sequences=True))
+        elif i == len(units) - 1:
+            model.add(Dropout(0.2))
+            model.add(Dense(units[i], activation='sigmoid'))
+        elif i < len(units) - 2:
+            model.add(LSTM(units[i], return_sequences=True))
+        else:
+            model.add(LSTM(units[i]))
+        
 
     return model
 
@@ -34,12 +41,17 @@ def get_gru(units):
     # Returns
         model: Model, nn model.
     """
-
     model = Sequential()
-    model.add(GRU(units[1], input_shape=(units[0], 1), return_sequences=True, reset_after=True))
-    model.add(GRU(units[2]))
-    model.add(Dropout(0.2))
-    model.add(Dense(units[3], activation='sigmoid'))
+    for i in range(1,len(units)):
+        if i == 1:
+            model.add(GRU(units[1], input_shape=(units[0], 1), return_sequences=True, reset_after=True))
+        elif i == len(units) - 1:
+            model.add(Dropout(0.2))
+            model.add(Dense(units[i], activation='sigmoid'))
+        elif i < len(units) - 2:
+            model.add(GRU(units[i], return_sequences=True))
+        else:
+            model.add(GRU(units[i]))
 
     return model
 
@@ -54,10 +66,17 @@ def get_rnn(units):
     """
 
     model = Sequential()
-    model.add(RNN(units[1], input_shape=(units[0], 1), return_sequences=True))
-    model.add(RNN(units[2]))
-    model.add(Dropout(0.2))
-    model.add(Dense(units[3], activation='sigmoid'))
+    for i in range(1,len(units)):
+        if i == 1:
+            model.add(SimpleRNN(units[1], input_shape=(units[0], 1), return_sequences=True))
+        elif i == len(units) - 1:
+            model.add(Dropout(0.2))
+            model.add(Dense(units[i], activation='sigmoid'))
+        elif i < len(units) - 2:
+            model.add(SimpleRNN(units[i], return_sequences=True))
+        else:
+            model.add(SimpleRNN(units[i]))
+
 
     return model
 

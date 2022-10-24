@@ -87,32 +87,34 @@ def main(argv):
     X_train_datetime, y_train_datetime, _, _, _,_,_,_,_,_,_,_ = process_data_datetime(file1, file2)
 
     # train each type of model
-    models_types = ['average'] #,'rnn','gru','saes','new_saes','average']
+    models_types = ['rnn']
+    test_identifier = ''
     for model_type in models_types:
+        model_name = model_type if test_identifier == '' else f"{model_type} ({test_identifier})"
         if model_type == 'lstm':
             X_train_series = np.reshape(X_train_series, (X_train_series.shape[0], X_train_series.shape[1], 1))
-            m = model.get_lstm([lag + 1, 64, 64, 1])
-            train_model(m, X_train_series, y_train_series, model_type, config)
+            m = model.get_lstm([lag + 1, 64,64, 1])
+            train_model(m, X_train_series, y_train_series, model_name, config)
         if model_type == 'rnn':
             X_train_series = np.reshape(X_train_series, (X_train_series.shape[0], X_train_series.shape[1], 1))
-            m = model.get_lstm([lag + 1, 64, 64, 1])
-            train_model(m, X_train_series, y_train_series, model_type, config)
+            m = model.get_rnn([lag + 1, 64,64, 1])
+            train_model(m, X_train_series, y_train_series, model_name, config)
         if model_type == 'gru':
             X_train_series = np.reshape(X_train_series, (X_train_series.shape[0], X_train_series.shape[1], 1))
-            m = model.get_gru([lag + 1, 64, 64, 1])
-            train_model(m, X_train_series, y_train_series, model_type, config)
+            m = model.get_gru([lag + 1, 64,64, 1])
+            train_model(m, X_train_series, y_train_series, model_name, config)
         if model_type == 'saes':
             X_train_series = np.reshape(X_train_series, (X_train_series.shape[0], X_train_series.shape[1]))
             m = model.get_saes([lag + 1, 400, 400, 400, 1])
-            train_seas(m, X_train_series, y_train_series, model_type, config)
+            train_seas(m, X_train_series, y_train_series, model_name, config)
         if model_type == 'new_saes':
             X_train_series = np.reshape(X_train_series, (X_train_series.shape[0], X_train_series.shape[1], 1))
             m = model.get_new_saes(lag + 1,1,encoder_size=10,auto_encoder_count=3, fine_tuning_layers=[10])
-            train_model(m, X_train_series, y_train_series, model_type, config)
+            train_model(m, X_train_series, y_train_series, model_name, config)
         if model_type == 'average':
             X_train_datetime = np.reshape(X_train_datetime, (X_train_datetime.shape[0], X_train_datetime.shape[1]))
-            m = model.get_average([3, 400, 400, 400, 1])
-            train_model(m, X_train_datetime, y_train_datetime, model_type, config)
+            m = model.get_average([3, 400,400, 400,1])
+            train_model(m, X_train_datetime, y_train_datetime, model_name, config)
 
 if __name__ == '__main__':
     main(sys.argv)
