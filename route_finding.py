@@ -130,11 +130,14 @@ class RouteNode:
         #print(self.cost, "km")
         return route
     
-    def expand_node(self, traffic_network: TrafficGraph) -> list:
+    def expand_nodes(self, traffic_network: TrafficGraph) -> list:
         nodes = list()
         for n in self.node.neighbours:
-            nodes.append(RouteNode(traffic_network.get_node_from_scats_number(n), self, self.date, self.model_type))
+            nodes.append(traffic_network.get_node_from_scats_number(n))
         return nodes
+
+    def expand_node(self, node: Node):
+        return RouteNode(node, self, self.date, self.model_type)
 
     def calcuate_node_cost(self, date: datetime, model_type: string) -> float:
         if self.previous_node == None:
@@ -233,30 +236,28 @@ def find_routes(traffic_network: TrafficGraph, origin: int, destination: int, da
             continue
         
         # expand the selected node
-        children: list = selected.expand_node(traffic_network)
+        children: list = selected.expand_nodes(traffic_network)
         
         # remove the selected node from the frontier
         frontier.remove(selected)
 
         # remove nodes with loops in it
         for c in children:
-            new_node: Node = c.node
-            previous_node: RouteNode = c.previous_node
+            new_node: Node = c
+            previous_node: RouteNode = selected.previous_node
             duplicated = False
             while previous_node != None:
                 if new_node == previous_node.node:
                     # duplicated node
-                    #print("duplicated")
+                    print("duplicated")
                     duplicated = True
                     break
                 # set the previous node to the previous previous node
                 previous_node = previous_node.previous_node
             
-            if duplicated:
-                children.remove(c)
+            if not duplicated:
+                frontier.append(selected.expand_node(c))
 
-        # TODO see if it needs to check for duplicate nodes before expanding
-        frontier.extend(children)
     
     return routes
 
