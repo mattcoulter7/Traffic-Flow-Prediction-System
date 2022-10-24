@@ -1,3 +1,4 @@
+from enum import Enum
 from time import time
 import warnings
 import numpy as np
@@ -11,8 +12,16 @@ from TrafficData.SingleModelScats.data.data import process_data_datetime,process
 from keras.models import load_model
 warnings.filterwarnings("ignore")
 
-class TrafficFlowPredictor():
+class TrafficFlowModelsEnum(Enum):
+    LSTM = 'lstm'
+    GRU = 'gru'
+    SAES = 'saes'
+    NEW_SAES = 'new_saes'
+    RNN = 'rnn'
+    AVERAGE = 'average'
 
+
+class TrafficFlowPredictor():
     def __init__(self):
         self.models = {}
 
