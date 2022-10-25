@@ -6,6 +6,7 @@ Traffic Flow Prediction with Neural Networks(SAEs、LSTM、GRU).
 - Tensorflow-gpu 1.5.0  
 - Keras 2.1.3
 - scikit-learn 0.19
+- geopy 2.2.0
 
 ## Train the model
 
