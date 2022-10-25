@@ -71,7 +71,7 @@ class TrafficFlowPredictor():
         rounded_time = 15 * math.floor(actual_time / 15) # get current 15 minute interval
 
         days = self.days_scaler.transform(np.array([dayindex for _ in range(steps)]).reshape(-1,1)).reshape(1,-1)[0]
-        times = self.times_scaler.transform(np.array([rounded_time + t*15 for t in range(steps)]).reshape(-1,1)).reshape(1,-1)[0]
+        times = self.times_scaler.transform(np.array([actual_time + t*15 for t in range(steps)]).reshape(-1,1)).reshape(1,-1)[0]
         scats = self.scats_scaler.transform(np.array([location for _ in range(steps)]).reshape(-1,1)).reshape(1,-1)[0]
 
         X = np.array([np.array([days[i],times[i],scats[i]]) for i in range(steps)])

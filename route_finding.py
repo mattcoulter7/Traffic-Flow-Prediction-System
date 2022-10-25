@@ -285,7 +285,7 @@ def createParser():
     args = parser.parse_args()
     return args
 
-def runRouter(src, dest, model: string):
+def runRouter(src, dest, date, model: string):
     model_type = model
     directions = ""
     scatsList = []
@@ -293,7 +293,7 @@ def runRouter(src, dest, model: string):
     print(traffic_network.get_node_from_scats_number(int(src)))
     if traffic_network.get_node_from_scats_number(int(src)) == None or traffic_network.get_node_from_scats_number(int(dest)) == None:
         return "Invalid SCATS Number"
-    routes = find_routes(traffic_network, int(src), int(dest), datetime.datetime.now(), model_type, route_options_count=5)
+    routes = find_routes(traffic_network, int(src), int(dest), date, model_type, route_options_count=5)
     for i, r in enumerate(routes):
         print (f"--ROUTE {i + 1}--")
         directions += f"--ROUTE {i + 1}--\n"
