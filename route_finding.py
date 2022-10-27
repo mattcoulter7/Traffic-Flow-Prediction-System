@@ -304,4 +304,4 @@ def runRouter(src, dest, date, model: string):
 
 if __name__ == "__main__":
     args = createParser()
-    runRouter(args.src, args.dest)
+    runRouter(args.src, args.dest, datetime.datetime.now(), TrafficFlowModelsEnum.LSTM.value)

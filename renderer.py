@@ -24,9 +24,6 @@ def getCoords(scat):
 
     print("unable to find SCAT location")
     return 0,0
-    
-def getNodesGeoJson():
-    return True
 
 
 def generateGeoJson(arr):
@@ -35,7 +32,7 @@ def generateGeoJson(arr):
     data['features'] = []
 
     for iter, route in reversed(list(enumerate(arr))):
-        weight = 5#4 if iter == 0 else 4
+        weight = 5
         color = "#3484F0" if iter == 0 else "#757575"
         coords = []
         for scat in route:
