@@ -58,9 +58,11 @@ class TrafficFlowPredictor():
         X = None
         if model_name == "average":
             X = self.get_datetime_inputs(location,date,steps)
+            if X is None: return 0
             y_pred = self.predict_datetime(model,X)
         else:
             X = self.get_timeseries_inputs(location,date,steps)
+            if X is None: return 0
             y_pred = self.predict_series(model,X)
         
         return y_pred.sum()
@@ -100,7 +102,16 @@ class TrafficFlowPredictor():
         location_X = self.lookup_location_data(location)
         if len(location_X) == 0:
             raise Exception(f"No Data exists for location {location}")
+        
         day_X = location_X[(day-1)*96:day*96]
+        
+        # fix for bad data having incomplete days
+        while len(day_X) == 0 and day >= 0:
+            day -= 7
+            day_X = location_X[(day-1)*96:day*96]
+
+        if len(day_X) == 0:
+            return None
 
         X = np.array([day_X[time_index + i] for i in range(steps)])
         X = np.reshape(X, (X.shape[0], X.shape[1], 1))
