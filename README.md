@@ -1,67 +1,29 @@
 # Traffic Flow Prediction
-Traffic Flow Prediction with Neural Networks(SAEs、LSTM、GRU).
+Traffic Flow Prediction with Neural Networks(SAEs, LSTM, GRU, RNN and Absolute Time Model (average)).
 
-## Requirement
-- Python 3.6    
-- Tensorflow-gpu 1.5.0  
-- Keras 2.1.3
-- scikit-learn 0.19
-- geopy 2.2.0
+# Dependencies
+1. folium==0.12.1.post1
+2. geopy==2.2.0
+3. keras==2.9.0
+4. matplotlib==3.5.3
+5. numpy==1.22.4
+6. pandas==1.4.3
+7. pygorithm==1.0.4
+8. scikit_learn==1.1.3
+9. tensorflow==2.10.0
+10. tensorflow_macos==2.9.2
+11. typing_extensions==4.4.0
 
-## Train the model
-
-**Run command below to train the model:**
-
-```
-python train.py --model model_name
-```
-
-You can choose "lstm", "gru" or "saes" as arguments. The ```.h5``` weight file was saved at model folder.
-
-
-## Experiment
-
-Data are obtained from the Caltrans Performance Measurement System (PeMS). Data are collected in real-time from individual detectors spanning the freeway system across all major metropolitan areas of the State of California.
-	
-	device: Tesla K80
-	dataset: PeMS 5min-interval traffic flow data
-	optimizer: RMSprop(lr=0.001, rho=0.9, epsilon=1e-06)
-	batch_szie: 256 
-
-
-**Run command below to run the program:**
-
-```
+# How to run
+Open the root directory in a terminal and type ```python app.py```
 python main.py
 ```
+The interface looks like below
+![image](https://user-images.githubusercontent.com/53892067/198414724-86ebf7fa-2e40-4ab6-b79d-5df30c2911f6.png)
 
-These are the details for the traffic flow prediction experiment.
+## Route Finding
+![image](https://user-images.githubusercontent.com/53892067/198416841-7377b74f-5dac-4436-b0ef-024416928c9e.png)
+![image](https://user-images.githubusercontent.com/53892067/198416883-09e87553-f404-4392-898d-dde390d5e983.png)
 
-
-| Metrics | MAE | MSE | RMSE | MAPE |  R2  | Explained variance score |
-| ------- |:---:| :--:| :--: | :--: | :--: | :----------------------: |
-| LSTM | 7.21 | 98.05 | 9.90 | 16.56% | 0.9396 | 0.9419 |
-| GRU | 7.20 | 99.32 | 9.97| 16.78% | 0.9389 | 0.9389|
-| SAEs | 7.06 | 92.08 | 9.60 | 17.80% | 0.9433 | 0.9442 |
-
-![evaluate](/images/eva.png)
-
-## Reference
-
-	@article{SAEs,  
-	  title={Traffic Flow Prediction With Big Data: A Deep Learning Approach},  
-	  author={Y Lv, Y Duan, W Kang, Z Li, FY Wang},
-	  journal={IEEE Transactions on Intelligent Transportation Systems, 2015, 16(2):865-873},
-	  year={2015}
-	}
-	
-	@article{RNN,  
-	  title={Using LSTM and GRU neural network methods for traffic flow prediction},  
-	  author={R Fu, Z Zhang, L Li},
-	  journal={Chinese Association of Automation, 2017:324-328},
-	  year={2017}
-	}
-
-
-## Copyright
-See [LICENSE](LICENSE) for details.
+## Traffic Flow Prediction
+![image](https://user-images.githubusercontent.com/53892067/198417086-bd24993c-9c90-4315-bc88-fc298c530819.png)
