@@ -17,7 +17,7 @@ Traffic Flow Prediction with Neural Networks(SAEs, LSTM, GRU, RNN and Absolute T
 ## How to run
 Open the root directory in a terminal and type ```python app.py```
 
-##Screenshots
+## Screenshots
 ![image](https://user-images.githubusercontent.com/53892067/198414724-86ebf7fa-2e40-4ab6-b79d-5df30c2911f6.png)
 
 ### Route Finding
